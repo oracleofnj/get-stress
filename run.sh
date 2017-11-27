@@ -21,7 +21,6 @@
 
 export train_cmd=run.pl
 export decode_cmd=run.pl
-. path.sh
 
 echoerr() { echo "$@" 1>&2; }
 set -e -o pipefail -u
@@ -35,9 +34,9 @@ stage=0
 . utils/parse_options.sh # accept options
 
 # if [ $stage -le 1 ]; then
-# echo "6998: Beginning stage 1"
-# echoerr "6998: Beginning stage 1"
-#  local/prepare_data.sh
+  echo "6998: Beginning stage 1"
+  echoerr "6998: Beginning stage 1"
+  . local/prepare_textdata.sh
   # Split speakers up into 3-minute chunks.  This doesn't hurt adaptation, and
   # lets us use more jobs for decoding etc.
   # [we chose 3 minutes because that gives us 38 speakers for the dev data, which is
@@ -48,6 +47,9 @@ stage=0
 #fi
 echo "6998: Completed stage 1"
 echoerr "6998: Completed stage 1"
+
+. path.sh
+pyenv global system
 
 if [ $stage -le 2 ]; then
   echo "6998: Beginning stage 2"
@@ -67,14 +69,15 @@ echo "6998: Completed stage 3"
 echoerr "6998: Completed stage 3"
 
 if [ $stage -le 4 ]; then
-  # later on we'll change this script so you have the option to
-  # download the pre-built LMs from openslr.org instead of building them
-  # locally.
-  local/ted_train_lm.sh
+  echo "6998: Beginning stage 4"
+  echoerr "6998: Beginning stage 4"
+  local/lj_train_lm.sh
 fi
-
 echo "6998:Completed stage: $stage..."
 echoerr "6998:Completed stage: $stage..."
+
+exit
+
 if [ $stage -le 5 ]; then
   local/format_lms.sh
 fi
