@@ -1,5 +1,7 @@
 #!/bin/bash
 #
+# Adapted from the Tedlium example in Kaldi.
+#
 # Based mostly on the Switchboard recipe. The training database is TED-LIUM,
 # it consists of TED talks with cleaned automatic transcripts:
 #
@@ -17,18 +19,24 @@
 # Apache 2.0
 #
 
-. cmd.sh
-. path.sh
+export train_cmd=run.pl
+export decode_cmd=run.pl
+export KALDI_ROOT="../kaldi-trunk"
+[ -f $KALDI_ROOT/tools/env.sh ] && . $KALDI_ROOT/tools/env.sh
+export PATH=$PWD/utils/:$KALDI_ROOT/tools/openfst/bin:$PWD:$PATH:$KALDI_ROOT/tools/sph2pipe_v2.5
+[ ! -f $KALDI_ROOT/tools/config/common_path.sh ] && echo >&2 "The standard file $KALDI_ROOT/tools/config/common_path.sh is not present -> Exit!" && exit 1
+. $KALDI_ROOT/tools/config/common_path.sh
+export LC_ALL=C
 
 
 echoerr() { echo "$@" 1>&2; }
 set -e -o pipefail -u
 
 nj=8
-decode_nj=4    # note: should not be >38 which is the number of speakers in the dev set
+decode_nj=8    # note: should not be >38 which is the number of speakers in the dev set
                # after applying --seconds-per-spk-max 180.  We decode with 4 threads, so
                # this will be too many jobs if you're using run.pl.
-stage=15
+stage=0
 
 . utils/parse_options.sh # accept options
 
