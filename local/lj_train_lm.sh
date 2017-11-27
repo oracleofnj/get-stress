@@ -89,7 +89,7 @@ if [ $stage -le 1 ]; then
   # Note: if you have more than one order, use a certain amount of words as the
   # vocab and want to restrict max memory for 'sort',
   echo "$0: training the unpruned LM"
-  min_counts='train=2 ted=1'
+  min_counts='train=1'
   wordlist=${dir}/data/wordlist
 
   lm_name="`basename ${wordlist}`_${order}"
@@ -99,7 +99,7 @@ if [ $stage -le 1 ]; then
   unpruned_lm_dir=${lm_dir}/${lm_name}.pocolm
   train_lm.py  --wordlist=${wordlist} --num-splits=10 --warm-start-ratio=20  \
                --limit-unk-history=true \
-               --fold-dev-into=ted ${bypass_metaparam_optim_opt} \
+               ${bypass_metaparam_optim_opt} \
                --min-counts="${min_counts}" \
                ${dir}/data/text ${order} ${lm_dir}/work ${unpruned_lm_dir}
 
