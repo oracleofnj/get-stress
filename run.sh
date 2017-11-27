@@ -21,13 +21,7 @@
 
 export train_cmd=run.pl
 export decode_cmd=run.pl
-export KALDI_ROOT="../kaldi-trunk"
-[ -f $KALDI_ROOT/tools/env.sh ] && . $KALDI_ROOT/tools/env.sh
-export PATH=$PWD/utils/:$KALDI_ROOT/tools/openfst/bin:$PWD:$PATH:$KALDI_ROOT/tools/sph2pipe_v2.5
-[ ! -f $KALDI_ROOT/tools/config/common_path.sh ] && echo >&2 "The standard file $KALDI_ROOT/tools/config/common_path.sh is not present -> Exit!" && exit 1
-. $KALDI_ROOT/tools/config/common_path.sh
-export LC_ALL=C
-
+. path.sh
 
 echoerr() { echo "$@" 1>&2; }
 set -e -o pipefail -u
@@ -40,39 +34,38 @@ stage=0
 
 . utils/parse_options.sh # accept options
 
-# Data preparation
-if [ $stage -le 0 ]; then
-  local/download_data.sh
-fi
-
-echo "6998:Completed stage: $stage..."
-echoerr "6998:Completed stage: $stage..."
-if [ $stage -le 1 ]; then
-  local/prepare_data.sh
+# if [ $stage -le 1 ]; then
+# echo "6998: Beginning stage 1"
+# echoerr "6998: Beginning stage 1"
+#  local/prepare_data.sh
   # Split speakers up into 3-minute chunks.  This doesn't hurt adaptation, and
   # lets us use more jobs for decoding etc.
   # [we chose 3 minutes because that gives us 38 speakers for the dev data, which is
   #  more than our normal 30 jobs.]
-  for dset in dev test train; do
-    utils/data/modify_speaker_info.sh --seconds-per-spk-max 180 data/${dset}.orig data/${dset}
-  done
-fi
+#  for dset in dev test train; do
+#    utils/data/modify_speaker_info.sh --seconds-per-spk-max 180 data/${dset}.orig data/${dset}
+#  done
+#fi
+echo "6998: Completed stage 1"
+echoerr "6998: Completed stage 1"
 
-echo "6998:Completed stage: $stage..."
-echoerr "6998:Completed stage: $stage..."
 if [ $stage -le 2 ]; then
+  echo "6998: Beginning stage 2"
+  echoerr "6998: Beginning stage 2"
   local/prepare_dict.sh
 fi
+echo "6998: Completed stage 2"
+echoerr "6998: Completed stage 2"
 
-echo "6998:Completed stage: $stage..."
-echoerr "6998:Completed stage: $stage..."
 if [ $stage -le 3 ]; then
+  echo "6998: Beginning stage 3"
+  echoerr "6998: Beginning stage 3"
   utils/prepare_lang.sh data/local/dict_nosp \
     "<unk>" data/local/lang_nosp data/lang_nosp
 fi
+echo "6998: Completed stage 3"
+echoerr "6998: Completed stage 3"
 
-echo "6998:Completed stage: $stage..."
-echoerr "6998:Completed stage: $stage..."
 if [ $stage -le 4 ]; then
   # later on we'll change this script so you have the option to
   # download the pre-built LMs from openslr.org instead of building them
