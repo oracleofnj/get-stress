@@ -30,7 +30,7 @@ nj=8
 decode_nj=8    # note: should not be >38 which is the number of speakers in the dev set
                # after applying --seconds-per-spk-max 180.  We decode with 4 threads, so
                # this will be too many jobs if you're using run.pl.
-stage=5
+stage=6
 
 . utils/parse_options.sh # accept options
 
