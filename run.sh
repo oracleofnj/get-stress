@@ -30,11 +30,11 @@ nj=8
 decode_nj=8    # note: should not be >38 which is the number of speakers in the dev set
                # after applying --seconds-per-spk-max 180.  We decode with 4 threads, so
                # this will be too many jobs if you're using run.pl.
-stage=4
+stage=5
 
 . utils/parse_options.sh # accept options
 
-# if [ $stage -le 1 ]; then
+if [ $stage -le 1 ]; then
   echo "6998: Beginning stage 1"
   echoerr "6998: Beginning stage 1"
   . local/prepare_textdata.sh
@@ -45,7 +45,7 @@ stage=4
 #  for dset in dev test train; do
 #    utils/data/modify_speaker_info.sh --seconds-per-spk-max 180 data/${dset}.orig data/${dset}
 #  done
-#fi
+fi
 echo "6998: Completed stage 1"
 echoerr "6998: Completed stage 1"
 
@@ -74,17 +74,19 @@ if [ $stage -le 4 ]; then
   echoerr "6998: Beginning stage 4"
   local/lj_train_lm.sh
 fi
-echo "6998:Completed stage: $stage..."
-echoerr "6998:Completed stage: $stage..."
+echo "6998: Completed stage 4"
+echoerr "6998: Completed stage 4"
+
+if [ $stage -le 5 ]; then
+  echo "6998: Beginning stage 5"
+  echoerr "6998: Beginning stage 5"
+  local/format_lms.sh
+fi
+echo "6998: Completed stage 5"
+echoerr "6998:Completed stage 5"
 
 exit
 
-if [ $stage -le 5 ]; then
-  local/format_lms.sh
-fi
-
-echo "6998:Completed stage: $stage..."
-echoerr "6998:Completed stage: $stage..."
 # Feature extraction
 if [ $stage -le 6 ]; then
   for set in test dev train; do
