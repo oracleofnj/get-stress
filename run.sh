@@ -85,16 +85,18 @@ fi
 echo "6998: Completed stage 5"
 echoerr "6998:Completed stage 5"
 
-exit
-
 # Feature extraction
 if [ $stage -le 6 ]; then
-  for set in test dev train; do
-    dir=data/$set
-    steps/make_mfcc.sh --nj $nj --cmd "$train_cmd" $dir
-    steps/compute_cmvn_stats.sh $dir
-  done
+  echo "6998: Beginning stage 6"
+  echoerr "6998: Beginning stage 6"
+  dir=data/train
+  steps/make_mfcc.sh --nj $nj --cmd "$train_cmd" $dir
+  steps/compute_cmvn_stats.sh $dir
 fi
+echo "6998: Completed stage 6"
+echoerr "6998:Completed stage 6"
+
+exit
 
 echo "6998:Completed stage: $stage..."
 echoerr "6998:Completed stage: $stage..."
