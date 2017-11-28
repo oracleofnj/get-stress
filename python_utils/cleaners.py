@@ -12,7 +12,7 @@ hyperparameter. Some cleaners are English-specific. You'll typically want to use
 
 import re
 from unidecode import unidecode
-from numbers import normalize_numbers
+from dont_call_it_numbers import normalize_numbers
 
 
 # Regular expression matching whitespace:

@@ -30,7 +30,7 @@ nj=8
 decode_nj=8    # note: should not be >38 which is the number of speakers in the dev set
                # after applying --seconds-per-spk-max 180.  We decode with 4 threads, so
                # this will be too many jobs if you're using run.pl.
-stage=11
+stage=13
 
 . utils/parse_options.sh # accept options
 
@@ -150,6 +150,26 @@ if [ $stage -le 11 ]; then
 fi
 echo "6998: Completed stage 11"
 echoerr "6998: Completed stage 11"
+
+if [ $stage -le 12 ]; then
+  echo "6998: Beginning stage 12"
+  echoerr "6998: Beginning stage 12"
+  dir=data/train
+  copy-matrix scp:$dir/feats.scp ark,t:- > $dir/pitch/textoutput.txt
+fi
+echo "6998: Completed stage 12"
+echoerr "6998: Completed stage 12"
+
+pyenv global general
+
+if [ $stage -le 13 ]; then
+  echo "6998: Beginning stage 13"
+  echoerr "6998: Beginning stage 13"
+  dir=data/train
+  python python_utils/kaldi_to_npz.py $dir/pitch/textoutput.txt $dir/pitch/numpy_features
+fi
+echo "6998: Completed stage 13"
+echoerr "6998: Completed stage 13"
 
 exit
 
