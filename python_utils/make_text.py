@@ -18,7 +18,7 @@ def convert_metadata(filename):
   with open(filename) as f:
     for line in f:
       utt_id, cleaned_text = convert_line(line)
-      print('{0} {1}'.format(utt_id, cleaned_text))
+      print('{0}-001 {1}'.format(utt_id, cleaned_text))
 
 if __name__ == "__main__":
   convert_metadata(os.path.join(TACOTRON_PATH, sys.argv[1]))

@@ -30,14 +30,19 @@ nj=8
 decode_nj=8    # note: should not be >38 which is the number of speakers in the dev set
                # after applying --seconds-per-spk-max 180.  We decode with 4 threads, so
                # this will be too many jobs if you're using run.pl.
-stage=6
+stage=7
 
 . utils/parse_options.sh # accept options
 
 if [ $stage -le 1 ]; then
   echo "6998: Beginning stage 1"
   echoerr "6998: Beginning stage 1"
+  mkdir -p data/train
+  . local/prepare_segments.sh > data/train/segments_all
+  . local/prepare_wav_scp.sh > data/train/wav.scp
+  . local/prepare_utt2spk.sh > data/train/utt2spk_all
   . local/prepare_textdata.sh
+  . utils/fix_data_dir.sh data/train
   # Split speakers up into 3-minute chunks.  This doesn't hurt adaptation, and
   # lets us use more jobs for decoding etc.
   # [we chose 3 minutes because that gives us 38 speakers for the dev data, which is
@@ -83,7 +88,7 @@ if [ $stage -le 5 ]; then
   local/format_lms.sh
 fi
 echo "6998: Completed stage 5"
-echoerr "6998:Completed stage 5"
+echoerr "6998: Completed stage 5"
 
 # Feature extraction
 if [ $stage -le 6 ]; then
@@ -94,21 +99,21 @@ if [ $stage -le 6 ]; then
   steps/compute_cmvn_stats.sh $dir
 fi
 echo "6998: Completed stage 6"
-echoerr "6998:Completed stage 6"
+echoerr "6998: Completed stage 6"
 
-exit
-
-echo "6998:Completed stage: $stage..."
-echoerr "6998:Completed stage: $stage..."
 # Now we have 212 hours of training data.
 # Well create a subset with 10k short segments to make flat-start training easier:
 if [ $stage -le 7 ]; then
+  echo "6998: Beginning stage 7"
+  echoerr "6998: Beginning stage 7"
   utils/subset_data_dir.sh --shortest data/train 10000 data/train_10kshort
   utils/data/remove_dup_utts.sh 10 data/train_10kshort data/train_10kshort_nodup
 fi
+echo "6998: Completed stage 7"
+echoerr "6998: Completed stage 7"
 
-echo "6998:Completed stage: $stage..."
-echoerr "6998:Completed stage: $stage..."
+exit
+
 # Train
 if [ $stage -le 8 ]; then
   steps/train_mono.sh --nj $nj --cmd "$train_cmd" \
