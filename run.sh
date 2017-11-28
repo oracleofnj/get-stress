@@ -30,7 +30,7 @@ nj=8
 decode_nj=8    # note: should not be >38 which is the number of speakers in the dev set
                # after applying --seconds-per-spk-max 180.  We decode with 4 threads, so
                # this will be too many jobs if you're using run.pl.
-stage=7
+stage=10
 
 . utils/parse_options.sh # accept options
 
@@ -112,22 +112,36 @@ fi
 echo "6998: Completed stage 7"
 echoerr "6998: Completed stage 7"
 
-exit
-
 # Train
 if [ $stage -le 8 ]; then
+  echo "6998: Beginning stage 8"
+  echoerr "6998: Beginning stage 8"
   steps/train_mono.sh --nj $nj --cmd "$train_cmd" \
     data/train_10kshort_nodup data/lang_nosp exp/mono
 fi
+echo "6998: Completed stage 8"
+echoerr "6998: Completed stage 8"
 
-echo "6998:Completed stage: $stage..."
-echoerr "6998:Completed stage: $stage..."
 if [ $stage -le 9 ]; then
+  echo "6998: Beginning stage 9"
+  echoerr "6998: Beginning stage 9"
   steps/align_si.sh --nj $nj --cmd "$train_cmd" \
     data/train data/lang_nosp exp/mono exp/mono_ali
-  steps/train_deltas.sh --cmd "$train_cmd" \
-    2500 30000 data/train data/lang_nosp exp/mono_ali exp/tri1
+  #steps/train_deltas.sh --cmd "$train_cmd" \
+  #  2500 30000 data/train data/lang_nosp exp/mono_ali exp/tri1
 fi
+echo "6998: Completed stage 9"
+echoerr "6998: Completed stage 9"
+
+if [ $stage -le 10 ]; then
+  echo "6998: Beginning stage 10"
+  echoerr "6998: Beginning stage 10"
+  . local/extract_ctm.sh
+fi
+echo "6998: Completed stage 10"
+echoerr "6998: Completed stage 10"
+
+exit
 
 echo "6998:Completed stage: $stage..."
 echoerr "6998:Completed stage: $stage..."

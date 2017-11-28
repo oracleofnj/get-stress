@@ -1,5 +1,6 @@
 db/
 data/
+exp/
 __pycache__/
 screenlog.*
 *.pyc
