@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 from cleaners import *
 
 ROOT_PATH="/home/jss2272"
@@ -21,15 +22,14 @@ def read_ctm(filename, phone_ids):
       utt_id, _, start_time, end_time, phone_id = line.strip().split(' ')
       if utt_id not in utts:
         utts[utt_id] = []
-      utts[utt_id].append({'start_time': float(start_time), 'end_time': float(end_time), 'phone': phone_ids[int(phone_id)]})
+      utts[utt_id].append({'start_time': float(start_time), 'duration': float(end_time), 'phone': phone_ids[int(phone_id)]})
   return utts
 
 
 if __name__ == "__main__":
   phone_ids = read_phones(os.path.join(STRESS, sys.argv[1]))
   utts = read_ctm(os.path.join(STRESS, sys.argv[2]), phone_ids)
-  for k, v in utts.items():
-    print(k, ' '.join([d['phone'] for d in v]))
+  print(json.dumps(utts, indent=2))
 
 
 
