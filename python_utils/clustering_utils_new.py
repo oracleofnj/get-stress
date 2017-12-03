@@ -213,25 +213,39 @@ def save_transcriptions(filename, transcriptions):
             ))
 
 
-def make_vowel_clusters(alignments_file, features_npz_file, vowel_pkl_file, train_metadata_file, test_metadata_file):
+def make_vowel_clusters(alignments_file, features_npz_file, vowel_pkl_file, subsampling=0.05):
     with open(alignments_file) as f:
         alignments_all = json.load(f)
     feats_all = np.load(features_npz_file)
-    feats_train, feats_test, alignments_train, alignments_test = train_test_split(feats_all, alignments_all)
-    phonedicts = assemble_phonedicts(feats_train, alignments_train)
-    vc = get_vowel_clusters(phonedicts)
+    feats_vc, align_vc = subsample(feats_all, alignments_all, subsampling)
+    pitch_and_power_vc = get_all_pitch_and_power(feats_vc)
+    vowels = assemble_vowels(pitch_and_power_vc, align_vc)
+    vc = get_combined_vowel_clusters(vowels)
     with open(vowel_pkl_file, 'wb') as f:
         pickle.dump(vc, f)
 
 
-def make_transcriptions(alignments_file, features_npz_file, vowel_pkl_file, train_metadata_file, test_metadata_file):
+def make_transcriptions_subsample(alignments_file, features_npz_file, vowel_pkl_file, sample_metadata_file, subsampling=0.05, random_state=6999):
     with open(alignments_file) as f:
         alignments_all = json.load(f)
     feats_all = np.load(features_npz_file)
-    feats_train, feats_test, alignments_train, alignments_test = train_test_split(feats_all, alignments_all)
     with open(vowel_pkl_file, 'rb') as f:
         vc = pickle.load(f)
-    train_transcriptions = transcribe_all(feats_train, alignments_train, vc)
-    test_transcriptions = transcribe_all(feats_test, alignments_test, vc)
+    feats_samp, align_samp = subsample(feats_all, alignments_all, subsampling, random_state)
+    pitch_and_power_samp = get_all_pitch_and_power(feats_samp)
+    sample_transcriptions = transcribe_all(pitch_and_power_samp, align_samp, vc)
+    save_transcriptions(sample_metadata_file, sample_transcriptions)
+
+
+def make_transcriptions_train_test(alignments_file, features_npz_file, vowel_pkl_file, train_metadata_file, test_metadata_file):
+    with open(alignments_file) as f:
+        alignments_all = json.load(f)
+    feats_all = np.load(features_npz_file)
+    with open(vowel_pkl_file, 'rb') as f:
+        vc = pickle.load(f)
+    feats_train, feats_test, align_train, align_test = train_test_split(feats_all, alignments_all)
+    pitch_and_power_train, pitch_and_power_test = get_all_pitch_and_power(feats_train), get_all_pitch_and_power(feats_test)
+    train_transcriptions = transcribe_all(pitch_and_power_train, align_train, vc)
+    test_transcriptions = transcribe_all(pitch_and_power_test, align_test, vc)
     save_transcriptions(train_metadata_file, train_transcriptions)
     save_transcriptions(test_metadata_file, test_transcriptions)
