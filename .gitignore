@@ -1,6 +1,7 @@
 db/
 data/
 exp/
+tedlium_pitch/
 __pycache__/
 screenlog.*
 *.pyc
