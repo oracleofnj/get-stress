@@ -11,3 +11,5 @@ latex/*.aux
 latex/*.bbl
 latex/*.fls
 latex/*.synctex.gz
+latex/*.blg
+latex/*_latexmk
