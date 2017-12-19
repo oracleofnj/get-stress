@@ -6,3 +6,8 @@ __pycache__/
 screenlog.*
 *.pyc
 *~
+bash_history.txt
+latex/*.aux
+latex/*.bbl
+latex/*.fls
+latex/*.synctex.gz
