@@ -1,0 +1,232 @@
+% Template for ICASSP-2018 paper; to be used with:
+%          spconf.sty  - ICASSP/ICIP LaTeX style file, and
+%          IEEEbib.bst - IEEE bibliography style file.
+% --------------------------------------------------------------------------
+\documentclass{article}
+\usepackage{spconf,amsmath,graphicx}
+
+% Example definitions.
+% --------------------
+% \def\x{{\mathbf x}}
+% \def\L{{\cal L}}
+
+\title{Neural Speech-To-Speech Synthesis}
+\name{Jared Samet - UNI: jss2272}
+\address{jss2272@columbia.edu}
+\begin{document}
+%\ninept
+%
+\maketitle
+%
+\begin{abstract}
+  Prosody features that transfer across speakers can be extracted using unsupervised learning. By adding the cluster labels as annotation to text, a text-to-speech synthesis system can learn to incorporate the prosody into its output. The resulting system can produce audio that is different even when the text is the same and the resulting audio can mimic the prosody from the original speaker. The abstract should be about 175 words total.
+\end{abstract}
+%
+\begin{keywords}
+Prosody, unsupervised learning, speech synthesis, seq2seq
+\end{keywords}
+%
+\section{Introduction}
+\label{sec:intro}
+
+I used Kaldi to create an alignment for the Tedlium data using the final triphone model it created. For each vowel phoneme, I used Kaldi's pitch extractor and the first MFCC component (energy) to create two series of numbers. Kaldi's pitch extractor is already normalized but I used StandardScaler to normalize the energy component across the utterance. I fit a second-degree (?) Legendre polynomial to the pitch and power to create six features for each vowel. The duration gave me the seventh feature. I then ran K-means clustering on these to create eight different vowel clusters that were common across the entire range of speakers in the (subsampled) Tedlium data.
+
+I then used the same triphone model to generate an alignment for the LJSpeech dataset, extracted the same pitch, power, and duration features for LJ, and used the previously computed vowel clusters to assign a cluster label to each vowel in the LJSpeech dataset. I (slightly) modified the Tacotron implementation to accept a sequence of tokens instead of a sequence of characters. Instead of text characters, my input tokens consisted of (Kaldi's) phonemes and the vowel cluster labels. Having suitably modified Tacotron, I then trained Tacotron on the <phoneme + cluster label, audio> pairs.
+
+Finally, to see if it worked, I recorded myself saying a sentence in multiple ways, ran each .wav through the same align + label steps, and fed the resulting <phoneme+label, text> pairs to Tacotron. She said the same thing different ways.
+
+\section{State of the Art}
+\label{sec:sota}
+
+About half of this section can come from original extended abstract. Additional stuff on prosody should go here. https://faculty.washington.edu/levow/papers/IS08_landmarks.pdf
+DECISION TREE BASED TONE MODELING FOR CHINESE SPEECH RECOGNITION
+Pui-Fung WONG, Man-Hung SIU
+
+\section{Prosody Features}
+\label{sec:prosody}
+
+I used pitch (from Kaldi) and power. I used first three Legendre coefficients to extract a finite set of features for a phoneme of arbitrary length by using [-1, 1] as the domain regardless of the actual length of the phoneme. I added a few frames at the beginning and end in case Kaldi got the alignment wrong. Show what the Legendre coefficients look like for some different curves. Show what the actual pitch and power curves look like for some brief, manually labeled utterances. Describe the Kaldi pitch extractor. Definitely include the Kaldi paper as a reference. Explain how the Legendre coefficients work. Explain why these were a sensible way of capturing prosody. Talk about pitch envelopes and tonal languages.
+
+\section{Clustering Vowels}
+\label{sec:vowels}
+
+Unsupervised learning FTW. Discuss why we should expect there to be clusters even in an atonal language like English. Talk about stressed vs unstressed as initial motivation but how there are probably more things like this. Talk about how stress is mostly a pitch change.
+
+I ran K-means clustering on my seven features and created eight vowel clusters. I'm pretty sure I ran StandardScaler on the features first so K-means didn't get confused, double check this. This was intended to be enough to capture the major variation across how different vowels can be pronounced but not so many as to result in too-few training examples. I originally did this for each vowel separately, and only for a single speaker, but then I decided that was stupid so I did it across all speakers and across eight vowels. So there are only eight clusters. Here I need to demonstrate that the clusters are in fact "semantically" different in some way. Maybe include some metric of these or run TSNE on the coefficients.
+
+I could probably have also just used the actual Legendre coefficients themselves but this would have required tinkering with the Tacotron internals more to accept continuous-valued features as part of the sequence instead of just a one-hot encoded value. This is something that could go in a future work section.
+
+\section{Tacotron}
+\label{sec:tacotron}
+
+Describe the Tacotron architecture and explain why it was easy to add the cluster labels.
+
+\subsection{Subheadings}
+\label{ssec:subhead}
+
+Just for reminder.
+
+\subsubsection{Sub-subheadings}
+\label{sssec:subsubhead}
+
+Just for reminder.
+
+\section{Pipeline}
+\label{sec:pipeline}
+
+Explain the full speech-to-speech pipeline:
+
+First is the training process, whose outputs are a vowel cluster model and a trained Tacotron
+
+\begin{itemize}
+
+  \item Use Kaldi to create alignments and pitch/power features from Tedlium
+  \item Use my code [part 1] to compute 7 features for each vowel
+  \item Use my code [part 2] to create a vowel cluster model
+  \item Use Kaldi to create alignments and pitch/power features from LJSpeech
+  \item Use my code [part 1] to compute 7 features for each vowel
+  \item Use my code [part 3] to assign cluster labels to each vowel
+  \item Train Tacotron on annotated LJSpeech
+
+\end{itemize}
+
+Second is the speech-to-speech pipeline, whose input is the vowel cluster model and the trained Tacotron from part 1, plus the WAV from a new speaker
+
+\begin{itemize}
+  \item Use Kaldi to create alignments and pitch/power features for the new WAV
+  \item Use my code [part 1] to compute 7 features for each vowel
+  \item Use my code [part 3] to assign cluster labels to each vowel
+  \item Run the phones + cluster labels through the trained Tacotron to produce the output WAV
+\end{itemize}
+
+\section{Results}
+\label{sec:results}
+
+Find some way to quantify that it actually did something beyond "she never stole my money".
+
+Try and quantify that the different clusters are actually different in some way. This is probably the most important section. Quantify if they are different from male to female speakers in any way.
+
+Try and quantify that the speech result is better for my Tacotron than for without annotations. Say why this could be useful even if no one wants to do speech to speech.
+
+Try and quantify that the output is actually preserving stuff from the original speech dataset.
+
+\section{Discussion}
+
+\section{Limitations}
+
+\section{Future Work}
+
+\section{ILLUSTRATIONS, GRAPHS, AND PHOTOGRAPHS}
+\label{sec:illust}
+
+Illustrations must appear within the designated margins.  They may span the two
+columns.  If possible, position illustrations at the top of columns, rather
+than in the middle or at the bottom.  Caption and number every illustration.
+All halftone illustrations must be clear black and white prints.  Colors may be
+used, but they should be selected so as to be readable when printed on a
+black-only printer.
+
+Since there are many ways, often incompatible, of including images (e.g., with
+experimental results) in a LaTeX document, below is an example of how to do
+this \cite{Lamp86}.
+
+\section{FOOTNOTES}
+\label{sec:foot}
+
+Use footnotes sparingly (or not at all!) and place them at the bottom of the
+column on the page on which they are referenced. Use Times 9-point type,
+single-spaced. To help your readers, avoid using footnotes altogether and
+include necessary peripheral observations in the text (within parentheses, if
+you prefer, as in this sentence).
+
+% Below is an example of how to insert images. Delete the ``\vspace'' line,
+% uncomment the preceding line ``\centerline...'' and replace ``imageX.ps''
+% with a suitable PostScript file name.
+% -------------------------------------------------------------------------
+\begin{figure}[htb]
+
+\begin{minipage}[b]{1.0\linewidth}
+  \centering
+  \centerline{\includegraphics[width=8.5cm]{image1}}
+%  \vspace{2.0cm}
+  \centerline{(a) Result 1}\medskip
+\end{minipage}
+%
+\begin{minipage}[b]{.48\linewidth}
+  \centering
+  \centerline{\includegraphics[width=4.0cm]{image3}}
+%  \vspace{1.5cm}
+  \centerline{(b) Results 3}\medskip
+\end{minipage}
+\hfill
+\begin{minipage}[b]{0.48\linewidth}
+  \centering
+  \centerline{\includegraphics[width=4.0cm]{image4}}
+%  \vspace{1.5cm}
+  \centerline{(c) Result 4}\medskip
+\end{minipage}
+%
+\caption{Example of placing a figure with experimental results.}
+\label{fig:res}
+%
+\end{figure}
+
+
+% To start a new column (but not a new page) and help balance the last-page
+% column length use \vfill\pagebreak.
+% -------------------------------------------------------------------------
+%\vfill
+%\pagebreak
+
+\section{COPYRIGHT FORMS}
+\label{sec:copyright}
+
+You must submit your fully completed, signed IEEE electronic copyright release
+form when you submit your paper. We {\bf must} have this form before your paper
+can be published in the proceedings.
+
+\section{RELATION TO PRIOR WORK}
+\label{sec:prior}
+
+The text of the paper should contain discussions on how the paper's
+contributions are related to prior work in the field. It is important
+to put new work in  context, to give credit to foundational work, and
+to provide details associated with the previous work that have appeared
+in the literature. This discussion may be a separate, numbered section
+or it may appear elsewhere in the body of the manuscript, but it must
+be present.
+
+You should differentiate what is new and how your work expands on
+or takes a different path from the prior studies. An example might
+read something to the effect: "The work presented here has focused
+on the formulation of the ABC algorithm, which takes advantage of
+non-uniform time-frequency domain analysis of data. The work by
+Smith and Cohen \cite{Lamp86} considers only fixed time-domain analysis and
+the work by Jones et al \cite{C2} takes a different approach based on
+fixed frequency partitioning. While the present study is related
+to recent approaches in time-frequency analysis [3-5], it capitalizes
+on a new feature space, which was not considered in these earlier
+studies."
+
+\vfill\pagebreak
+
+\section{REFERENCES}
+\label{sec:refs}
+
+List and number all bibliographical references at the end of the
+paper. The references can be numbered in alphabetic order or in
+order of appearance in the document. When referring to them in
+the text, type the corresponding reference number in square
+brackets as shown at the end of this sentence \cite{C2}. An
+additional final page (the fifth page, in most cases) is
+allowed, but must contain only references to the prior
+literature.
+
+% References should be produced using the bibtex program from suitable
+% BiBTeX files (here: strings, refs, manuals). The IEEEbib.bst bibliography
+% style file from IEEE produces unsorted bibliography list.
+% -------------------------------------------------------------------------
+\bibliographystyle{IEEEbib}
+\bibliography{strings,refs}
+
+\end{document}
