@@ -29,18 +29,23 @@ Prosody, unsupervised learning, speech synthesis, seq2seq
 \section{Introduction}
 \label{sec:intro}
 
-I used Kaldi to create an alignment for the Tedlium data using the final triphone model it created. For each vowel phoneme, I used Kaldi's pitch extractor and the first MFCC component (energy) to create two series of numbers. Kaldi's pitch extractor is already normalized but I used StandardScaler to normalize the energy component across the utterance. I fit a second-degree (?) Legendre polynomial to the pitch and power to create six features for each vowel. The duration gave me the seventh feature. I then ran K-means clustering on these to create eight different vowel clusters that were common across the entire range of speakers in the (subsampled) Tedlium data.
+I used Kaldi to create an alignment for the Tedlium data using the final triphone model it created. For each vowel phoneme, I used Kaldi's pitch extractor and the first MFCC component (energy) to create two series of numbers. Kaldi's pitch extractor is already normalized but I used [StandardScaler] to normalize the energy component across the utterance. I fit a second-degree (?) Legendre polynomial to the pitch and power to create six features for each vowel. The duration gave me the seventh feature. I then ran K-means clustering on these to create eight different vowel clusters that were common across the entire range of speakers in the (subsampled) Tedlium data.
 
-I then used the same triphone model to generate an alignment for the LJSpeech dataset, extracted the same pitch, power, and duration features for LJ, and used the previously computed vowel clusters to assign a cluster label to each vowel in the LJSpeech dataset. I (slightly) modified the Tacotron implementation to accept a sequence of tokens instead of a sequence of characters. Instead of text characters, my input tokens consisted of (Kaldi's) phonemes and the vowel cluster labels. Having suitably modified Tacotron, I then trained Tacotron on the <phoneme + cluster label, audio> pairs.
+I then used the same triphone model to generate an alignment for the LJSpeech dataset, extracted the same pitch, power, and duration features for LJ, and used the previously computed vowel clusters to assign a cluster label to each vowel in the LJSpeech dataset. I (slightly) modified the Tacotron implementation to accept a sequence of tokens instead of a sequence of characters. Instead of text characters, my input tokens consisted of (Kaldi's) phonemes and the vowel cluster labels. Having suitably modified Tacotron, I then trained Tacotron on the [phoneme + cluster label, audio] pairs.
 
-Finally, to see if it worked, I recorded myself saying a sentence in multiple ways, ran each .wav through the same align + label steps, and fed the resulting <phoneme+label, text> pairs to Tacotron. She said the same thing different ways.
+Finally, to see if it worked, I recorded myself saying a sentence in multiple ways, ran each .wav through the same align + label steps, and fed the resulting [phoneme+label, text] pairs to Tacotron. She said the same thing different ways.
 
-\section{State of the Art}
+\section{Related Work}
 \label{sec:sota}
 
-About half of this section can come from original extended abstract. Additional stuff on prosody should go here. https://faculty.washington.edu/levow/papers/IS08_landmarks.pdf
-DECISION TREE BASED TONE MODELING FOR CHINESE SPEECH RECOGNITION
-Pui-Fung WONG, Man-Hung SIU
+This project involved two main components: first, extracting prosody features from a set of input audio files; and second, training a text-to-speech synthesis model on a dataset that had been labeled using the extracted prosody features.
+
+Selkirk \cite{selkirk1995sentence} discusses sentence prosody and pitch accent in the context of English. Although English is generally not thought of as a tonal language, Selkirk writes that "[i]n English a pitch accent associates to a stress-prominent syllable in a word (typicall the main word stress)." Fujisaki \cite{fujisaki2004information} models the $F_0$ contour over the duration of an utterance as the sum of a set of impulse response and step response functions, parameterized with a finite number of scalar values.
+Wang et al. \cite{wang2008mandarin} use the pitch and amplitude contours to improve tone recognition in Mandarin by identifying "maxima, minima, and inflection points of particular acoustic events."
+Wong and Siu \cite{pui2004decision} use robust regression and orthogonal polynomials to create features for a decision tree classifier in order to recognize tones in Chinese lan guages. Finally, Lin \cite{lin2005language} and Mary \cite{mary2011extraction} use a small number of Legendre polynomial coefficients to represent the pitch contour as a finite-dimensional feature vector, which is the approach used in this project.
+
+Speech synthesis or text-to-speech is a well-studied problem that has been actively researched since the 1950s. While there has been remarkable progress in the field in recent years, the quality of computer-generated speech has not yet reached human levels. Current commercial systems described in Khan et al. \cite{khan2016concatenative} and Taylor  \cite{taylor2009text} generally use concatenative speech synthesis to produce their output. However, the alternative approach of parametric synthesis using neural networks is rapidly gaining popularity, with several papers since 2016 demonstrating impressive results in the quality of the output.
+The first of this generation was Google's WaveNet (Oord et al. \cite{oord2016wavenet}), followed in quick succession by Deep Voice and Deep Voice 2 from Baidu (Arik et al. \cite{arik2017deep}, \cite{arik2017deep2}), Char2Wav from MILA (Sotelo et al. \cite{sotelo2017char2wav}), and Tacotron from Google (Wang et al. \cite{wang2017tacotron}). Each of these systems has taken a different approach to the network architecture to address different aspects of the speech synthesis pipeline.
 
 \section{Prosody Features}
 \label{sec:prosody}
@@ -128,7 +133,7 @@ black-only printer.
 
 Since there are many ways, often incompatible, of including images (e.g., with
 experimental results) in a LaTeX document, below is an example of how to do
-this \cite{Lamp86}.
+this.
 
 \section{FOOTNOTES}
 \label{sec:foot}
@@ -201,8 +206,8 @@ or takes a different path from the prior studies. An example might
 read something to the effect: "The work presented here has focused
 on the formulation of the ABC algorithm, which takes advantage of
 non-uniform time-frequency domain analysis of data. The work by
-Smith and Cohen \cite{Lamp86} considers only fixed time-domain analysis and
-the work by Jones et al \cite{C2} takes a different approach based on
+Smith and Cohen considers only fixed time-domain analysis and
+the work by Jones et al takes a different approach based on
 fixed frequency partitioning. While the present study is related
 to recent approaches in time-frequency analysis [3-5], it capitalizes
 on a new feature space, which was not considered in these earlier
@@ -217,7 +222,7 @@ List and number all bibliographical references at the end of the
 paper. The references can be numbered in alphabetic order or in
 order of appearance in the document. When referring to them in
 the text, type the corresponding reference number in square
-brackets as shown at the end of this sentence \cite{C2}. An
+brackets as shown at the end of this sentence \cite{fujisaki2004information}. An
 additional final page (the fifth page, in most cases) is
 allowed, but must contain only references to the prior
 literature.
