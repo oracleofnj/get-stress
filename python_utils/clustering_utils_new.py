@@ -254,7 +254,7 @@ def plot_utterances(alignments_file, features_npz_file, output_path):
     ).intersection(
         list(pitch_and_power.keys())
     ):
-        fig = plot_utterance(k, pitch_and_power, feats_all)
+        fig = plot_utterance(k, pitch_and_power, alignments_all)
         fig.savefig('{0}.png'.format(os.path.join(output_path, k)))
 
 
