@@ -57,7 +57,7 @@ fi
 graphdir=$1
 data=$2
 dir=$3
-srcdir=`dirname $dir`; # The model directory is one level up from decoding directory.
+srcdir=`dirname $graphdir`; # The model directory is one level up from decoding directory.
 sdata=$data/split$nj;
 
 mkdir -p $dir/log

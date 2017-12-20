@@ -43,7 +43,7 @@ si_dir=
 fmllr_update_type=full
 num_threads=1 # if >1, will use gmm-latgen-faster-parallel
 parallel_opts=  # ignored now.
-skip_scoring=false
+skip_scoring=true
 scoring_opts=
 max_fmllr_jobs=25  # I've seen the fMLLR jobs overload NFS badly if the decoding
                    # was started with a lot of many jobs, so we limit the number of
@@ -78,7 +78,7 @@ graphdir=$1
 data=$2
 dir=`echo $3 | sed 's:/$::g'` # remove any trailing slash.
 
-srcdir=`dirname $dir`; # Assume model directory one level up from decoding directory.
+srcdir=`dirname $graphdir`; # Assume model directory one level up from decoding directory.
 sdata=$data/split$nj;
 
 thread_string=
@@ -136,6 +136,7 @@ done
 ##
 
 ## Set up the unadapted features "$sifeats"
+
 if [ -f $srcdir/final.mat ]; then feat_type=lda; else feat_type=delta; fi
 echo "$0: feature type is $feat_type";
 case $feat_type in
@@ -226,4 +227,3 @@ fi
 rm $dir/{trans_tmp,pre_trans}.*
 
 exit 0;
-

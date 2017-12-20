@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 import json
@@ -7,7 +9,7 @@ import sys
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 
-ROOT_PATH="/home/jss2272"
+ROOT_PATH=os.path.expanduser('~')
 TACOTRON_PATH=os.path.join(ROOT_PATH, "tacotron")
 STRESS=os.path.join(ROOT_PATH, "get-stress")
 

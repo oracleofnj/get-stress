@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
 import json
@@ -184,5 +186,3 @@ def make_transcriptions(alignments_file, features_npz_file, vowel_pkl_file, trai
     test_transcriptions = transcribe_all(feats_test, alignments_test, vc)
     save_transcriptions(train_metadata_file, train_transcriptions)
     save_transcriptions(test_metadata_file, test_transcriptions)
-
-

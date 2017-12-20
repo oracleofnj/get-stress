@@ -1,8 +1,10 @@
+from __future__ import print_function
+from __future__ import division
 import numpy as np
 import os
 import sys
 
-ROOT_PATH="/home/jss2272"
+ROOT_PATH=os.path.expanduser('~')
 TACOTRON_PATH=os.path.join(ROOT_PATH, "tacotron")
 STRESS=os.path.join(ROOT_PATH, "get-stress")
 
@@ -25,6 +27,3 @@ def kaldi_to_npz(kaldifile):
 if __name__ == "__main__":
   mats = kaldi_to_npz(os.path.join(STRESS, sys.argv[1]))
   np.savez_compressed(os.path.join(STRESS, sys.argv[2]), **mats)
-
-
-
