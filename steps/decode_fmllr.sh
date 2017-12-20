@@ -137,7 +137,9 @@ done
 
 ## Set up the unadapted features "$sifeats"
 
+echo "***LISTING***"
 ls $srcdir/final.mat
+echo "***LISTING***"
 
 if [ -f $srcdir/final.mat ]; then feat_type=lda; else feat_type=delta; fi
 echo "$0: feature type is $feat_type";
