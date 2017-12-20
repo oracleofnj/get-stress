@@ -22,6 +22,7 @@
 export train_cmd=run.pl
 export decode_cmd=run.pl
 export TEDLIUM=../kaldi-trunk/egs/tedlium/s5_r2
+export VOWEL_CLUSTER_MODEL=tedlium_8_clusters_python2.pkl
 
 echoerr() { echo "$@" 1>&2; }
 set -e -o pipefail -u
@@ -105,5 +106,15 @@ steps/make_mfcc_pitch.sh --nj $nj --cmd "$train_cmd" \
 # Convert to numpy
 copy-matrix scp:$ANNOTATION_DIR/feats.scp ark,t:- > $ANNOTATION_DIR/pitch/textoutput.txt
 python python_utils/kaldi_to_npz.py $ANNOTATION_DIR/pitch/textoutput.txt $ANNOTATION_DIR/pitch/numpy_features
+
+# Add cluster labels
+python python_utils/generate_one_transcription.py \
+  $ANNOTATION_DIR/ali.json \
+  $ANNOTATION_DIR/pitch/numpy_features.npz \
+  $VOWEL_CLUSTER_MODEL \
+  $ANNOTATION_DIR/clustered.csv
+
+# Print the cluster file
+cat $ANNOTATION_DIR/clustered.csv
 
 exit
