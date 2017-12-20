@@ -94,7 +94,7 @@ $KALDI_ROOT/src/bin/ali-to-phones \
 
 # Convert to JSON
 python python_utils/decode_ctms.py \
-  $TEDLIUM/data/lang \
+  $TEDLIUM/data/lang/phones.txt \
   $ANNOTATION_DIR/ali/ali.1.ctm > $ANNOTATION_DIR/ali.json
 
 # Make pitch features
