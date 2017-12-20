@@ -207,6 +207,7 @@ def transcribe_all(feats, alignments, vowel_clusters):
 
 
 def save_transcriptions(filename, transcriptions):
+    print(transcriptions)
     with open(filename, 'w') as f:
         for k, v in transcriptions.items():
             f.write('{0}|{1}|{1}\n'.format(
