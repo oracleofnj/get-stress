@@ -79,7 +79,6 @@ data=$2
 dir=`echo $3 | sed 's:/$::g'` # remove any trailing slash.
 
 srcdir=`dirname $graphdir`; # Assume model directory one level up from decoding directory.
-echo "****** $srcdir ******"
 sdata=$data/split$nj;
 
 thread_string=
@@ -137,6 +136,9 @@ done
 ##
 
 ## Set up the unadapted features "$sifeats"
+
+ls $srcdir/final.mat
+
 if [ -f $srcdir/final.mat ]; then feat_type=lda; else feat_type=delta; fi
 echo "$0: feature type is $feat_type";
 case $feat_type in
