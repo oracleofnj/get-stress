@@ -85,7 +85,7 @@ utils/int2sym.pl -f 2- \
 # Create alignment
 mkdir -p $ANNOTATION_DIR/ali
 steps/align_si.sh --nj $nj --cmd "$train_cmd" \
-  $TEDLIUM/data/train $TEDLIUM/data/lang $TEDLIUM/exp/tri3 $ANNOTATION_DIR/ali
+  $ANNOTATION_DIR $TEDLIUM/data/lang $TEDLIUM/exp/tri3 $ANNOTATION_DIR/ali
 
 exit
 
