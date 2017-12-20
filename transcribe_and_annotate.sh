@@ -65,6 +65,11 @@ echo "$INPUT_FILENAME $ANNOTATION_DIR/$MONO_WAV" > $ANNOTATION_DIR/wav.scp
 steps/make_mfcc.sh --nj $nj --cmd "$train_cmd" $ANNOTATION_DIR
 steps/compute_cmvn_stats.sh $ANNOTATION_DIR
 
+# Decode
+steps/decode_fmllr.sh --nj $decode_nj --cmd "$decode_cmd"  --num-threads 4 \
+  $TEDLIUM/exp/tri3/graph $ANNOTATION_DIR/data $ANNOTATION_DIR/decode
+
+
 exit
 
 if [ $stage -le 14 ]; then
