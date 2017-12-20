@@ -30,7 +30,6 @@ nj=1
 decode_nj=1    # note: should not be >38 which is the number of speakers in the dev set
                # after applying --seconds-per-spk-max 180.  We decode with 4 threads, so
                # this will be too many jobs if you're using run.pl.
-stage=1
 
 . utils/parse_options.sh # accept options
 . path.sh
@@ -39,6 +38,11 @@ if [ $# -lt 1 ] || [ $# -gt 1 ]; then
    echo "Usage: $0 <wav-path>";
    exit 1;
 fi
+
+# Resample to 16k
+
+sox $1 -c 1 -r 16000 /tmp/${1%.wav}_mono_16k.wav
+
 
 exit
 
