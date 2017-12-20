@@ -70,6 +70,7 @@ steps/decode_fmllr.sh --nj $decode_nj --cmd "$decode_cmd"  --num-threads 4 \
   $TEDLIUM/exp/tri3/graph $ANNOTATION_DIR $ANNOTATION_DIR/decode
 
 # Extract one-best transcription
+rm -f $ANNOTATION_DIR/decode.si/lat.1
 gunzip $ANNOTATION_DIR/decode.si/lat.1.gz
 lattice-best-path \
   --word-symbol-table=$TEDLIUM/exp/tri3/graph/words.txt \
@@ -80,6 +81,11 @@ utils/int2sym.pl -f 2- \
     $TEDLIUM/exp/tri3/graph/words.txt \
     $ANNOTATION_DIR/one-best.tra \
     > $ANNOTATION_DIR/text;
+
+# Create alignment
+mkdir -p $ANNOTATION_DIR/ali
+steps/align_si.sh --nj $nj --cmd "$train_cmd" \
+  $TEDLIUM/data/train $TEDLIUM/data/lang $TEDLIUM/exp/tri3 $ANNOTATION_DIR/ali
 
 exit
 
