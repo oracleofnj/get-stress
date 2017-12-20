@@ -69,6 +69,12 @@ steps/compute_cmvn_stats.sh $ANNOTATION_DIR
 steps/decode_fmllr.sh --nj $decode_nj --cmd "$decode_cmd"  --num-threads 4 \
   $TEDLIUM/exp/tri3/graph $ANNOTATION_DIR $ANNOTATION_DIR/decode
 
+# Extract one-best transcription
+gunzip $ANNOTATION_DIR/decode.si/lat.1.gz
+lattice-best-path \
+  --word-symbol-table=$TEDLIUM/exp/tri3/graph/words.txt \
+  ark:$ANNOTATION_DIR/decode.si/lat.1 \
+  ark,t:$ANNOTATION_DIR/one-best.tra
 
 exit
 
