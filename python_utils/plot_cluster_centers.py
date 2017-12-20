@@ -23,9 +23,9 @@ def plot_cluster_centers(cluster_model, output_file, n_points=21):
     dur_coefs = cluster_centers[:, 6]
 
     mean_pitch_polys = legval(x_points, pitch_coefs.T)
-    mean_pitch_polys = legval(x_points, power_coefs.T)
+    mean_power_polys = legval(x_points, power_coefs.T)
     print(mean_pitch_polys)
-    print(mean_pitch_polys)
+    print(mean_power_polys)
     print(dur_coefs)
 
 
