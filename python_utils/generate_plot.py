@@ -8,6 +8,9 @@ import os
 import sys
 from clustering_utils_new import plot_utterances
 
+import matplotlib
+matplotlib.use('Agg')
+
 if __name__ == "__main__":
     plot_utterances(
         sys.argv[1],     # all_alignments.json
