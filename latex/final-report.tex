@@ -20,7 +20,14 @@
 \maketitle
 %
 \begin{abstract}
-  Prosody features that transfer across speakers can be extracted using unsupervised learning. By adding the cluster labels as annotation to text, a text-to-speech synthesis system can learn to incorporate the prosody into its output. The resulting system can produce audio that is different even when the text is the same and the resulting audio can mimic the prosody from the original speaker. The abstract should be about 175 words total.
+We present a system that extracts prosody features from a multi-speaker dataset.
+The prosody features are computed using by fitting low-degree Legendre series to the pitch and power contours of the audio for each vowel in the input audio.
+We cluster the features using unsupervised learning to produce a discrete set of categories for the pronunciation of English vowels.
+By adding the cluster labels as annotation to text, a text-to-speech synthesis system can learn to incorporate the prosody into its output.
+We then annotate a single-speaker speech dataset with these cluster labels and then use to train a Tacotron model.
+The resulting system can produce audio that is different even when the text is the same.
+Prosody features from utterances by new speakers can be extracted in the same way and the resulting features used to cluster and annotate the text of the new utterance.
+The trained speech synthesis can use the results to produce new synthesized audio that mimics the prosody from the original speaker.
 \end{abstract}
 %
 \begin{keywords}
@@ -42,7 +49,7 @@ Finally, to see if it worked, I recorded myself saying a sentence in multiple wa
 This project involved two main components: first, extracting prosody features from a set of input audio files; and second, training a text-to-speech synthesis model on a dataset that had been labeled using the extracted prosody features.
 
 Selkirk \cite{selkirk1995sentence} discusses sentence prosody and pitch accent in the context of English. Although English is generally not thought of as a tonal language, Selkirk writes that ``[i]n English a pitch accent associates to a stress-prominent syllable in a word (typically the main word stress.)''
-Ghahremani et al. \cite{ghahremani2014pitch} describes an pitch-extraction algorithm (``the Kaldi pitch tracker'') based on Talkin \cite{talkin1995robust} that is specifically designed for use in the speech recognition concept and is implemented in the open-source Kaldi project \cite{}. This project uses that implementation to extract the pitch contour.
+Ghahremani et al. \cite{ghahremani2014pitch} describes an pitch-extraction algorithm (``the Kaldi pitch tracker'') based on Talkin \cite{talkin1995robust} that is specifically designed for use in the speech recognition concept and is implemented in the open-source Kaldi project \cite{Povey_ASRU2011}. This project uses that implementation to extract the pitch contour.
 Fujisaki \cite{fujisaki2004information} models the $F_0$ contour over the duration of an utterance as the sum of a set of impulse response and step response functions, parameterized with a finite number of scalar values.
 Wang et al. \cite{wang2008mandarin} use the pitch and amplitude contours to improve tone recognition in Mandarin by identifying ``maxima, minima, and inflection points of particular acoustic events.''
 Wong and Siu \cite{pui2004decision} use robust regression and orthogonal polynomials to create features for a decision tree classifier in order to recognize tones in Chinese lan guages. Finally, Lin \cite{lin2005language} and Mary \cite{mary2011extraction} use a small number of Legendre polynomial coefficients to represent the pitch contour as a finite-dimensional feature vector, which is the approach used in this project.
@@ -152,7 +159,7 @@ Duration               & -0.2/-0.5      & 0.0/0.0        & 2.0/1.6        & 0.0/
 To the extent that the seven extracted prosody features for each vowel do indeed convey useful information, there are numerous ways one could imagine using them to ``clone'' an input utterance.
 For example, the speech output of a speech synthesis system could be distorted in some smooth way in order to try and match the pitch and power contours of the entire input audio.
 Alternately, they could be used as the inputs to a supervised classification algorithm that learned to classify each syllable as stressed or unstressed, with the help of a manually-annotated dataset.
-The system I implemented uses $k$-means, an unsupervised algorithm, to partition the space of features into 8 categorical cluster labels.
+The system implemented here uses $k$-means, an unsupervised algorithm, to partition the space of features into 8 categorical cluster labels.
 
 As stated in Sec. \ref{sec:overview}, the input to the vowel-cluster training process consists of an acoustic model and a multi-speaker speech dataset.
 The prosody features for each vowel in the dataset are first computed using the acoustic model as described in Sec. \ref{sec:prosody}.
@@ -162,8 +169,6 @@ The resulting vowel cluster model therefore consists of the scaling factors that
 
 There were number of choices involved in how to perform the clustering, including the number of clusters, the use of an unsupervised algorithm as opposed to a supervised algorith, and the decision to use a single set of cluster labels for all vowels, as opposed to computing clusters for each vowel individually. These choices are discussed further in Sec. \ref{sec:discussion}.
 
-
-Here I need to demonstrate that the clusters are in fact "semantically" different in some way. Maybe include some metric of these or run TSNE on the coefficients.
 
 \section{Speech Synthesis}
 \label{sec:tacotron}
@@ -176,24 +181,39 @@ The corresponding labeled phone sequence is ``IH VOWEL4 N sp SIL EY VOWEL1 T IY 
 The Tacotron \cite{wang2017tacotron} neural network system was trained on the [labeled phone sequence, audio] pairs to produce audio.
 Tacotron's internal neural network architecture is far too complex to describe in detail in this paper. As a brief overview, it is based on the Sutskever et al \cite{sutskever2014sequence} encoder-decoder seq2seq model with Bahdanau \cite{bahdanau2014neural} attention. The input is a sequence of one-hot-encoded characters.
 The encoder embeds the characters in a continuous vector space, and passes them through the CBHG module described in the Tacotron paper.
-The decoder uses GRUs with attention to produce linear-scale spectrogram as the output sequence.
+The decoder uses GRUs with attention to produce linear-scale spectrogram as the output sequence. Finally, the Griffin-Lim algorithm produces the actual audio from the spectrogram.
 
-Since Tacotron is agnostic to the character set, I used the phones and the cluster labels, along with the word-boundary marker, as the character set. Tacotron's neural network architecture makes this possible out-of-the-box; it was specifically designed to accomodate end-to-end training using only audio and the corresponding text as its inputs, in contrast to the relatively complex requirements for most speech synthesis systems.
+Since Tacotron is agnostic to the character set, the phones and the cluster labels are used here, along with the word-boundary marker, as the character set. Tacotron's neural network architecture makes this possible out-of-the-box; it was specifically designed to accomodate end-to-end training using only audio and the corresponding text as its inputs, in contrast to the relatively complex requirements for most speech synthesis systems.
 One specific advantage discussed by the authors is that ``it more easily
 allows for rich conditioning on various attributes''. The vowel cluster labels used here are an example of this conditioning.
 
-For this project, I used Keith Ito's open-source implementation of Tacotron, with only small modifications required to accomodate my modified character set. The model was trained with his LJ Speech Dataset \cite{ljspeech17}, which he describes on his website as follows:
+The ``C'' in CBHG refers to a bank of 1-dimensional convolutional filters; this layer is what allows Tacotron to easily incorporate the vowel markings as if they were simply another character. The convolutional filters include a width of up to 16 characters (in this case, phonemes plus vowel cluster labels), which is more than enough for the model to learn how successive cluster labels are typically associated with the prosody of the training audio.
+
+This project uses Keith Ito's open-source implementation of Tacotron, with only small modifications required to accomodate the modified character set. The model was trained with his LJ Speech Dataset \cite{ljspeech17}, which he describes on his website as follows:
 ``This is a public domain speech dataset consisting of 13,100 short audio clips of a single speaker reading passages from 7 non-fiction books. A transcription is provided for each clip. Clips vary in length from 1 to 10 seconds and have a total length of approximately 24 hours. The texts were published between 1884 and 1964, and are in the public domain. The audio was recorded in 2016-17 by the LibriVox project and is also in the public domain.''
 
-The result of this portion of the system is a trained model that takes a labeled phone sequence as input and produces audio as output.
+The result of this portion of the system is a trained model that takes a labeled phone sequence as input and produces audio as output. For this project, the model was trained for approximately 150,000 steps, which took approximately four days on a Tesla K80 GPU running on Google Cloud.
 
 \section{New Utterance Generation}
 \label{sec:newuttgen}
-
-
+Once the vowel-cluster and speech synthesis models have been trained, synthesizing new outputs is straightforward.
+The only difference at this phase is that Kaldi can optionally be used to generate a transcription before computing the alignments.
+Of course, if the input text is provided along with the audio, the alignment will be more accurate.
+Once the alignments are computed, the prosody features for the input utterance are extracted as before and the vowel clustering model is then used to assign cluster labels to each vowel.
+This sequence of steps results in a labeled phone sequence.
+The trained Tacotron model then uses this sequence directly to synthesize a new audio file.
 
 \section{Results}
 \label{sec:results}
+
+Although my resources for this project did not permit me to conduct a controlled experiment, a potential one is discussed in Sec \ref{sec:futurework}.
+However, several pairs of input and output audio are included with the code for this project.
+These demonstrate, at least to the author's ears, that the extracted features and resulting cluster labels are indeed capturing some semantic meaning in the input that is reflected in the synthesized audio.
+They also reveal some shortcomings of the approach taken here and possibilities for future improvement.
+
+
+
+Here I need to demonstrate that the clusters are in fact "semantically" different in some way. Maybe include some metric of these or run TSNE on the coefficients.
 
 Find some way to quantify that it actually did something beyond "she never stole my money".
 
@@ -223,48 +243,15 @@ In my first version of this project, I computed four distinct clusters for each 
 \section{Limitations}
 
 \section{Future Work}
+\label{sec:futurework}
 
 I could probably have also just used the actual Legendre coefficients themselves but this would have required tinkering with the Tacotron internals more to accept continuous-valued features as part of the sequence instead of just a one-hot encoded value. This is something that could go in a future work section.
+
+Describe experiment
 
 \section{Acknowledgements}
 \label{sec:acknowledgements}
 I would like to thank Keith Ito for his outstanding open-source implementation of Tacotron. This project would not have been possible without his work. I would also like to thank Dan Povey, the lead developer of Kaldi, which was also essential to this project. Finally, I would like to thank Professor Beigi for teaching this class, which has been a pleasure!
-
-\begin{figure}[htb]
-
-\begin{minipage}[b]{1.0\linewidth}
-  \centering
-  \centerline{\includegraphics[width=8.5cm]{image1}}
-%  \vspace{2.0cm}
-  \centerline{(a) Result 1}\medskip
-\end{minipage}
-%
-\begin{minipage}[b]{.48\linewidth}
-  \centering
-  \centerline{\includegraphics[width=4.0cm]{image3}}
-%  \vspace{1.5cm}
-  \centerline{(b) Results 3}\medskip
-\end{minipage}
-\hfill
-\begin{minipage}[b]{0.48\linewidth}
-  \centering
-  \centerline{\includegraphics[width=4.0cm]{image4}}
-%  \vspace{1.5cm}
-  \centerline{(c) Result 4}\medskip
-\end{minipage}
-%
-\caption{Example of placing a figure with experimental results.}
-\label{fig:res}
-%
-\end{figure}
-
-
-% To start a new column (but not a new page) and help balance the last-page
-% column length use \vfill\pagebreak.
-% -------------------------------------------------------------------------
-%\vfill
-%\pagebreak
-
 
 \vfill\pagebreak
 
