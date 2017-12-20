@@ -41,8 +41,11 @@ fi
 
 # Resample to 16k
 
+ANNOTATION_DIR = /tmp/${1%.wav}
 MONO_WAV=${1%.wav}_mono_16k.wav
-sox $1 -c 1 -r 16000 /tmp/$MONO_WAV
+mkdir -p $ANNOTATION_DIR
+sox $1 -c 1 -r 16000 /$ANNOTATION_DIR/$MONO_WAV
+
 
 
 exit
