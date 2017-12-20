@@ -76,12 +76,10 @@ lattice-best-path \
   ark:$ANNOTATION_DIR/decode.si/lat.1 \
   ark,t:$ANNOTATION_DIR/one-best.tra
 
-grep $INPUT_FILENAME $ANNOTATION_DIR/one-best.tra > $ANNOTATION_DIR/text
-
 utils/int2sym.pl -f 2- \
     $TEDLIUM/exp/tri3/graph/words.txt \
     $ANNOTATION_DIR/one-best.tra \
-    > $ANNOTATION_DIR/one-best-hypothesis.txt;
+    > $ANNOTATION_DIR/text;
 
 exit
 
