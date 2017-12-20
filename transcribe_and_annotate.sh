@@ -114,7 +114,15 @@ python python_utils/generate_one_transcription.py \
   $VOWEL_CLUSTER_MODEL \
   $ANNOTATION_DIR/clustered.csv
 
+python python_utils/generate_plot.py \
+  $ANNOTATION_DIR/ali.json \
+  $ANNOTATION_DIR/pitch/numpy_features.npz \
+  $ANNOTATION_DIR
+
 # Print the cluster file
+echo ""
+echo
 cat $ANNOTATION_DIR/clustered.csv
 
+echo "Plot saved in $ANNOTATION_DIR/$INPUT_FILENAME.png"
 exit
