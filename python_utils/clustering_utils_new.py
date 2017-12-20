@@ -253,8 +253,7 @@ def make_transcriptions_subsample(
         align_samp, vc,
         include_scaled_features=include_scaled_features
     )
-    if not include_scaled_features:
-        save_transcriptions(sample_metadata_file, sample_transcriptions, strip_four=strip_four)
+    save_transcriptions(sample_metadata_file, sample_transcriptions, strip_four=strip_four)
 
 
 def plot_utterances(alignments_file, features_npz_file, output_path):
