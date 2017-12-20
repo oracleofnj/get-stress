@@ -243,13 +243,11 @@ def make_transcriptions_subsample(alignments_file, features_npz_file, vowel_pkl_
     save_transcriptions(sample_metadata_file, sample_transcriptions, strip_four=strip_four)
 
 
-def plot_utterances(alignments_file, features_npz_file, vowel_pkl_file):
+def plot_utterances(alignments_file, features_npz_file):
     with open(alignments_file) as f:
         alignments_all = json.load(f)
     feats_all = np.load(features_npz_file)
-    with open(vowel_pkl_file, 'rb') as f:
-        vc = pickle.load(f)
-    pitch_and_power = get_all_pitch_and_power(feats)
+    pitch_and_power = get_all_pitch_and_power(feats_all)
     print(type(feats_all))
     print(feats_all.keys())
     print(type(pitch_and_power))
