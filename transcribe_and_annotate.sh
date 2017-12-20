@@ -36,7 +36,7 @@ stage=1
 . path.sh
 
 if [ $# -lt 1 ] || [ $# -gt 1 ]; then
-   echo "Usage: $0 [options] <wav-path>";
+   echo "Usage: $0 <wav-path>";
    exit 1;
 fi
 
