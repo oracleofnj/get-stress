@@ -109,24 +109,42 @@ Most importantly, these features are intended to be useful for identifying which
 However, spoken English uses pitch contour to convey more information than simply which syllable is a word is stressed. Pierrehumbert \cite{pierrehumbert1980phonology} identifies 22 different patterns that an English phrase can exhibit, consisting of various combinations of pitch accent, phrase accent, and intonation occurring at the end of a phrase.
 These phrases carry semantic content beyond the actual words of the text. For example, different stress patterns can indicate surprise, emphasis, disbelief, or neutrality, among others.
 
-Figure \ref{fig:pitchpow1} displays the pitch and power contours that Kaldi computes for two pronunciations of the the two-word phrase ``another orange'' (the phrase is from \cite{pierrehumbert1980phonology}.) In the first audio file, the words are spoken with a neutral tone. In the second pronunciation, the words are spoken with a tone of disbelief, i.e., ``a\textbf{NOTH}er orange???''. The seven computed features for each vowel are displayed in Table \ref{table:pitchpow1}.
+Figure \ref{fig:pitchpow1} displays the pitch and power contours that Kaldi computes for two pronunciations of the the two-word phrase ``another orange'' (the phrase is from \cite{pierrehumbert1980phonology}.) In the first audio file, the words are spoken with a tone of disbelief, i.e., ``aNOTHer orange???''. In the second pronunciation, the words are spoken with a neutral tone. The seven computed features for each vowel are displayed in Table \ref{table:pitchpow1}.
 
 \begin{figure}[htb]
 
-\begin{minipage}[b]{.52\linewidth}
-  \centering
-  \centerline{\includegraphics[width=4.0cm]{orange_neutral}}
-\end{minipage}
-\hfill
-\begin{minipage}[b]{0.44\linewidth}
+\begin{minipage}[b]{.46\linewidth}
   \centering
   \centerline{\includegraphics[width=4.0cm]{orange_aNOTHer}}
 \end{minipage}
+\hfill
+\begin{minipage}[b]{0.5\linewidth}
+  \centering
+  \centerline{\includegraphics[width=4.5cm]{orange_neutral}}
+\end{minipage}
 %
-\caption{Normalized pitch and power contours. The figure on the right was uttered with a tone of disbelief.}
+\caption{Normalized pitch and power contours. The figure on the left was uttered with a tone of disbelief.}
 \label{fig:pitchpow1}
 %
 \end{figure}
+
+\begin{table}[]
+\centering
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+\textbf{}              & \textbf{A(n)}  & \textbf{O(th)} & \textbf{E(r)}  & \textbf{O(r)}  & \textbf{A(nj)} \\ \hline
+Pitch 1                & -1.1/-2.4      & -3.2/0.6       & 0.9/0.5        & 3.6/0.0        & 1.2/0.1        \\ \hline
+Pitch 2                & -2.0/3.5       & 0.0/0.6        & 5.5/-0.1       & -2.5/-0.2      & 0.8/0.8        \\ \hline
+Pitch 3                & 0.8/6.3        & 0.6/1.2        & 3.4/0.5        & -5.0/0.5       & -0.1/-1.1      \\ \hline
+Power 1                & 0.1/0.0        & 0.8/1.0        & 0.7/1.0        & 0.8/1.1        & 1.5/0.9        \\ \hline
+Power 2                & 2.7/1.5        & -0.1/-0.4      & -0.6/0.5       & 1.3/0.6        & 0.2/0.4        \\ \hline
+Power 3                & -1.3/-0.6      & 0.4/-0.3       & 1.4/0.7        & 0.5/0.5        & 0.5/-0.4       \\ \hline
+Duration               & -0.2/-0.5      & 0.0/0.0        & 2.0/1.6        & 0.0/0.0        & -0.4/-0.4      \\ \hline
+\textbf{Cluster} & \textbf{7 / 6} & \textbf{6 / 4} & \textbf{5 / 4} & \textbf{2 / 4} & \textbf{1 / 1} \\ \hline
+\end{tabular}
+\caption{Extracted prosody features for two pronunciations. The first number in each cell is for the tone of disbelief. The last row shows the cluster label that the vowel was assigned to.}
+\label{table:pitchpow1}
+\end{table}
 
 \section{Vowel Clustering}
 \label{sec:vowels}
