@@ -43,7 +43,7 @@ si_dir=
 fmllr_update_type=full
 num_threads=1 # if >1, will use gmm-latgen-faster-parallel
 parallel_opts=  # ignored now.
-skip_scoring=false
+skip_scoring=true
 scoring_opts=
 max_fmllr_jobs=25  # I've seen the fMLLR jobs overload NFS badly if the decoding
                    # was started with a lot of many jobs, so we limit the number of
