@@ -48,8 +48,13 @@ mkdir -p $ANNOTATION_DIR
 sox $1 -c 1 -r 16000 $ANNOTATION_DIR/$MONO_WAV
 
 # Make utt2spk
+echo "$INPUT_FILENAME $INPUT_FILENAME" > $ANNOTATION_DIR/utt2spk
 
-echo ""
+# Make spk2utt
+utils/utt2spk_to_spk2utt.pl $ANNOTATION_DIR/utt2spk > $ANNOTATION_DIR/spk2utt
+
+# Make segments
+
 
 exit
 
