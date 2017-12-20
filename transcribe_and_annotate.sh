@@ -78,7 +78,13 @@ lattice-best-path \
 
 grep $INPUT_FILENAME $ANNOTATION_DIR/one-best.tra > $ANNOTATION_DIR/text
 
+utils/int2sym.pl -f 2- \
+    $TEDLIUM/exp/tri3/graph/words.txt \
+    $ANNOTATION_DIR/one-best.tra \
+    > $ANNOTATION_DIR/one-best-hypothesis.txt;
+
 exit
+
 
 if [ $stage -le 14 ]; then
   echo "6998: Beginning stage 14"
