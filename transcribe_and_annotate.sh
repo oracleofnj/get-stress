@@ -92,6 +92,16 @@ $KALDI_ROOT/src/bin/ali-to-phones \
   --ctm-output $ANNOTATION_DIR/ali/final.mdl \
   ark:"gunzip -c $ANNOTATION_DIR/ali/ali.1.gz|" - > $ANNOTATION_DIR/ali/ali.1.ctm
 
+# Convert to JSON
+python python_utils/decode_ctms.py \
+  $TEDLIUM/data/lang \
+  $ANNOTATION_DIR/ali/ali.1.ctm > $ANNOTATION_DIR/ali.json
+
+# Make pitch features
+mkdir -p $ANNOTATION_DIR/pitch
+steps/make_mfcc_pitch.sh --nj $nj --cmd "$train_cmd" \
+  $ANNOTATION_DIR $ANNOTATION_DIR/log $ANNOTATION_DIR/pitch
+
 
 
 
