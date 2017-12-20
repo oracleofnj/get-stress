@@ -76,8 +76,6 @@ def plot_utterance(key, pitch_and_power, alignments):
     pp = pitch_and_power[key]
     align = alignments[key]
     num_frames = pp['pitch'].shape[0]
-    print(num_frames)
-    print(np.sum([phone['duration'] for phone in align]))
     fig, ax1 = plt.subplots(figsize=(8, num_frames/10))
     ax2 = ax1.twiny()
 
@@ -98,7 +96,7 @@ def plot_utterance(key, pitch_and_power, alignments):
         for phone in align
     ])
     ax1.set_ylim(num_frames-1, 0)
-    plt.show()
+    return fig
 
 
 def get_pitch_and_power(feat):
@@ -243,15 +241,18 @@ def make_transcriptions_subsample(alignments_file, features_npz_file, vowel_pkl_
     save_transcriptions(sample_metadata_file, sample_transcriptions, strip_four=strip_four)
 
 
-def plot_utterances(alignments_file, features_npz_file):
+def plot_utterances(alignments_file, features_npz_file, output_path):
     with open(alignments_file) as f:
         alignments_all = json.load(f)
     feats_all = np.load(features_npz_file)
     pitch_and_power = get_all_pitch_and_power(feats_all)
-    print(type(feats_all))
-    print(feats_all.keys())
-    print(type(pitch_and_power))
-    print(pitch_and_power.keys())
+    for k in set(
+        list(feats_all.keys())
+    ).intersection(
+        list(pitch_and_power.keys())
+    ):
+        fig = plot_utterance(k, pitch_and_power, feats_all)
+        fig.savefig('{0}.png'.format(os.path.join(output_path, k)))
 
 
 def make_transcriptions_train_test(alignments_file, features_npz_file, vowel_pkl_file, train_metadata_file, test_metadata_file):
