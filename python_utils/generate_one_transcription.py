@@ -15,4 +15,5 @@ if __name__ == "__main__":
         sys.argv[3],     # vowel_models.pkl
         sys.argv[4],     # sample_transcriptions.csv
         1.0,
+        strip_four=False
     )

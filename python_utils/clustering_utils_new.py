@@ -206,12 +206,15 @@ def transcribe_all(feats, alignments, vowel_clusters):
             for key in feats.keys()}
 
 
-def save_transcriptions(filename, transcriptions):
-    print(transcriptions)
+def save_transcriptions(filename, transcriptions, strip_four=True):
     with open(filename, 'w') as f:
         for k, v in transcriptions.items():
+            if strip_four:
+                keyname = k[:-4]
+            else:
+                keyname = k
             f.write('{0}|{1}|{1}\n'.format(
-                k[:-4],
+                keyname,
                 v
             ))
 
@@ -228,7 +231,7 @@ def make_vowel_clusters(alignments_file, features_npz_file, vowel_pkl_file, subs
         pickle.dump(vc, f)
 
 
-def make_transcriptions_subsample(alignments_file, features_npz_file, vowel_pkl_file, sample_metadata_file, subsampling=0.05, random_state=6999):
+def make_transcriptions_subsample(alignments_file, features_npz_file, vowel_pkl_file, sample_metadata_file, subsampling=0.05, random_state=6999, strip_four=True):
     with open(alignments_file) as f:
         alignments_all = json.load(f)
     feats_all = np.load(features_npz_file)
@@ -237,7 +240,7 @@ def make_transcriptions_subsample(alignments_file, features_npz_file, vowel_pkl_
     feats_samp, align_samp = subsample(feats_all, alignments_all, subsampling, random_state)
     pitch_and_power_samp = get_all_pitch_and_power(feats_samp)
     sample_transcriptions = transcribe_all(pitch_and_power_samp, align_samp, vc)
-    save_transcriptions(sample_metadata_file, sample_transcriptions)
+    save_transcriptions(sample_metadata_file, sample_transcriptions, strip_four=strip_four)
 
 
 def make_transcriptions_train_test(alignments_file, features_npz_file, vowel_pkl_file, train_metadata_file, test_metadata_file):
