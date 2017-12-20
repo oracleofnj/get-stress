@@ -41,7 +41,8 @@ fi
 
 # Resample to 16k
 
-sox $1 -c 1 -r 16000 /tmp/${1%.wav}_mono_16k.wav
+MONO_WAV=${1%.wav}_mono_16k.wav
+sox $1 -c 1 -r 16000 /tmp/$MONO_WAV
 
 
 exit
