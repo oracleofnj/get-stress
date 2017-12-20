@@ -34,8 +34,8 @@ decode_nj=1    # note: should not be >38 which is the number of speakers in the 
 . utils/parse_options.sh # accept options
 . path.sh
 
-if [ $# -lt 1 ] || [ $# -gt 1 ]; then
-   echo "Usage: $0 <wav-path>";
+if [ $# -lt 2 ] || [ $# -gt 2 ]; then
+   echo "Usage: $0 <wav-path> <transcription-path>";
    exit 1;
 fi
 
@@ -61,26 +61,8 @@ echo "$INPUT_FILENAME $INPUT_FILENAME 0 $length" > $ANNOTATION_DIR/segments
 # Make wav.scp
 echo "$INPUT_FILENAME $ANNOTATION_DIR/$MONO_WAV" > $ANNOTATION_DIR/wav.scp
 
-# Compute MFCCs
-steps/make_mfcc.sh --nj $nj --cmd "$train_cmd" $ANNOTATION_DIR
-steps/compute_cmvn_stats.sh $ANNOTATION_DIR
-
-# Decode
-steps/decode_fmllr.sh --nj $decode_nj --cmd "$decode_cmd"  --num-threads 4 \
-  $TEDLIUM/exp/tri3/graph $ANNOTATION_DIR $ANNOTATION_DIR/decode
-
-# Extract one-best transcription
-rm -f $ANNOTATION_DIR/decode.si/lat.1
-gunzip $ANNOTATION_DIR/decode.si/lat.1.gz
-lattice-best-path \
-  --word-symbol-table=$TEDLIUM/exp/tri3/graph/words.txt \
-  ark:$ANNOTATION_DIR/decode.si/lat.1 \
-  ark,t:$ANNOTATION_DIR/one-best.tra
-
-utils/int2sym.pl -f 2- \
-    $TEDLIUM/exp/tri3/graph/words.txt \
-    $ANNOTATION_DIR/one-best.tra \
-    > $ANNOTATION_DIR/text;
+TRANSCRIPTION = "$(cat $2)"
+echo "$INPUT_FILENAME $TRANSCRIPTION" > $ANNOTATION_DIR/text
 
 # Create alignment
 mkdir -p $ANNOTATION_DIR/ali
