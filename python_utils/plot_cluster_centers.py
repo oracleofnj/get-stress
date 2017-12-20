@@ -53,10 +53,8 @@ def plot_cluster_centers(cluster_model, output_file=None, n_points=21):
             '{0} ms'.format(int(x))
             for x in ax1.get_xticks()
         ])
-        if i % 2 == 0:
-            ax1.set_ylabel('Pitch', color='blue')
-        else:
-            ax2.set_ylabel('Power', color='red')
+        ax1.set_ylabel('Pitch', color='blue')
+        ax2.set_ylabel('Power', color='red')
     fig.savefig(output_file)
 
 
