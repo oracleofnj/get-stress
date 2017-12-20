@@ -79,6 +79,7 @@ data=$2
 dir=`echo $3 | sed 's:/$::g'` # remove any trailing slash.
 
 srcdir=`dirname $graphdir`; # Assume model directory one level up from decoding directory.
+echo "****** $srcdir ******"
 sdata=$data/split$nj;
 
 thread_string=
