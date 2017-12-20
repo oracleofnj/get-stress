@@ -78,7 +78,7 @@ graphdir=$1
 data=$2
 dir=`echo $3 | sed 's:/$::g'` # remove any trailing slash.
 
-srcdir=`dirname $dir`; # Assume model directory one level up from decoding directory.
+srcdir=`dirname $graphdir`; # Assume model directory one level up from decoding directory.
 sdata=$data/split$nj;
 
 thread_string=
@@ -96,7 +96,7 @@ silphonelist=`cat $graphdir/phones/silence.csl` || exit 1;
 
 # Some checks.  Note: we don't need $srcdir/tree but we expect
 # it should exist, given the current structure of the scripts.
-for f in $graphdir/HCLG.fst $data/feats.scp; do
+for f in $graphdir/HCLG.fst $data/feats.scp $srcdir/tree; do
   [ ! -f $f ] && echo "$0: no such file $f" && exit 1;
 done
 
