@@ -57,12 +57,6 @@ The goal of this project was to create a system that, given an input audio file 
 The system implemented uses a pipeline of several processing steps in order to accomplish this.
 An overview of the pipeline and a diagram are presented here for context; a detailed description of each step follows.
 
-The first portion of the system is the vowel-cluster training process, which takes as input a previously-trained acoustic model for alignment and a speech dataset from multiple speakers. As output, it produces a clustering model that can be used to annotate an audio utterance from an arbitrary speaker with cluster labels for each vowel in the utterance. This portion of the system uses Kaldi to, first, perform forced alignment on the multi-speaker dataset, and, second, to extract the pitch contour and the first (energy) MFCC component for each frame of the input audio. Given the alignment, pitch, and power contours, an unsupervised clustering algorithm (K-means) trained on the audio segments corresponding to vowels to learn several distinct ways in which syllables can be pronounced.
-
-The second portion of the system is the speech-synthesis training process, which takes as input the pre-existing acoustic model, the newly-trained vowel-cluster model, and a large speech dataset from a single speaker. As output, it produces a trained Tacotron model that can be used to generate synthesized utterances. This portion of the system first uses Kaldi to perform forced alignment on the speech dataset and extract the pitch and power features, as before. It then uses the vowel-cluster model to produce an annotated phoneme sequence for each utterance in the single-speaker dataset. Finally, the audio and the annotated phoneme sequence pairs are used to train the Tacotron model.
-
-The final portion of the system is generates new utterances. As input, it takes the pre-existing acoustic model, the newly-trained vowel-cluster model, and the newly-trained Tacotron model, and an input audio file in the voice of an arbitrary speaker. As output, it produces synthesized audio of the equivalent utterance where the prosody matches that of the input utterance as closely as possible. This portion of the system computes an alignment for the input utterance and extracts the pitch and power features; uses the vowel cluster model to produce an annotated phoneme sequence for the input utterance; and, finally, uses the newly-trained Tacotron model to synthesize the output audio.
-
 \begin{figure}[htb]
 
 \begin{minipage}[b]{1.0\linewidth}
@@ -73,11 +67,27 @@ The final portion of the system is generates new utterances. As input, it takes 
 \label{fig:overview}
 \end{figure}
 
+The first portion of the system is the vowel-cluster training process, which takes as input a previously-trained acoustic model for alignment and a speech dataset from multiple speakers. As output, it produces a clustering model that can be used to annotate an audio utterance from an arbitrary speaker with cluster labels for each vowel in the utterance. This portion of the system uses Kaldi to, first, perform forced alignment on the multi-speaker dataset, and, second, to extract the pitch contour and the first (energy) MFCC component for each frame of the input audio. Given the alignment, pitch, and power contours, an unsupervised clustering algorithm (K-means) trained on the audio segments corresponding to vowels to learn several distinct ways in which syllables can be pronounced.
+
+The second portion of the system is the speech-synthesis training process, which takes as input the pre-existing acoustic model, the newly-trained vowel-cluster model, and a large speech dataset from a single speaker. As output, it produces a trained Tacotron model that can be used to generate synthesized utterances. This portion of the system first uses Kaldi to perform forced alignment on the speech dataset and extract the pitch and power features, as before. It then uses the vowel-cluster model to produce an annotated phoneme sequence for each utterance in the single-speaker dataset. Finally, the audio and the annotated phoneme sequence pairs are used to train the Tacotron model.
+
+The final portion of the system is generates new utterances. As input, it takes the pre-existing acoustic model, the newly-trained vowel-cluster model, and the newly-trained Tacotron model, and an input audio file in the voice of an arbitrary speaker. As output, it produces synthesized audio of the equivalent utterance where the prosody matches that of the input utterance as closely as possible. This portion of the system computes an alignment for the input utterance and extracts the pitch and power features; uses the vowel cluster model to produce an annotated phoneme sequence for the input utterance; and, finally, uses the newly-trained Tacotron model to synthesize the output audio.
+
 \section{Prosody Feature Extraction}
 \label{sec:prosody}
 
 All three portions of the pipeline involve extracting prosody features from the input audio -- in the vowel-cluster training process, the input audio is the multi-speaker dataset; in the single-speaker annotation process, the input audio is the single-speaker dataset; and in the utterance-generation portion, the input audio is the new utterance the user wishes to re-synthesize in a new voice.
 The prosody feature extraction is performed in three steps; Figure \ref{fig:prosodyextraction} shows a diagram.
+
+\begin{figure}[htb]
+
+\begin{minipage}[b]{1.0\linewidth}
+  \centering
+  \centerline{\includegraphics[width=8.5cm]{Prosody_Extraction.png}}
+\end{minipage}
+\caption{Prosody Feature Extraction}
+\label{fig:prosodyextraction}
+\end{figure}
 
 First, Kaldi's \texttt{align.sh} script uses a pretrained acoustic triphone model -- in this project, the final triphone model resulting from Kaldi's TEDLIUM recipe -- to compute a forced alignment of the input audio, and Kaldi's \texttt{ali-to-phones} tool is used to convert the model-level alignment to a sequence of \textit{(phone\_id, start\_time, end\_time)} tuples.
 Next, Kaldi's \texttt{make\_mfcc\_pitch.sh} script creates the MFCC and pitch features for each frame of the input audio, the \texttt{copy-matrix} tool converts this to a text file, and my python script \texttt{kaldi\_to\_npz.py} converts the text file to a numpy array (.npz) file.
@@ -99,16 +109,23 @@ Most importantly, these features are intended to be useful for identifying which
 However, spoken English uses pitch contour to convey more information than simply which syllable is a word is stressed. Pierrehumbert \cite{pierrehumbert1980phonology} identifies 22 different patterns that an English phrase can exhibit, consisting of various combinations of pitch accent, phrase accent, and intonation occurring at the end of a phrase.
 These phrases carry semantic content beyond the actual words of the text. For example, different stress patterns can indicate surprise, emphasis, disbelief, or neutrality, among others.
 
-Figure \ref{fig:pitchpow1} displays the pitch and power contours that Kaldi computes for two pronunciations of the the two-word phrase ``another orange'' (the phrase is from Pierrehumbert \cite{pierrehumbert1980phonology}.) In the first audio file, the words are spoken with a neutral tone. In the second pronunciation, the words are spoken with a tone of disbelief, i.e., ``a\textbf{NOTH}er orange???''. The seven computed features for each vowel are displayed in Table \ref{table:pitchpow1}.
+Figure \ref{fig:pitchpow1} displays the pitch and power contours that Kaldi computes for two pronunciations of the the two-word phrase ``another orange'' (the phrase is from \cite{pierrehumbert1980phonology}.) In the first audio file, the words are spoken with a neutral tone. In the second pronunciation, the words are spoken with a tone of disbelief, i.e., ``a\textbf{NOTH}er orange???''. The seven computed features for each vowel are displayed in Table \ref{table:pitchpow1}.
 
 \begin{figure}[htb]
 
-\begin{minipage}[b]{1.0\linewidth}
+\begin{minipage}[b]{.52\linewidth}
   \centering
-  \centerline{\includegraphics[width=8.5cm]{Prosody_Extraction.png}}
+  \centerline{\includegraphics[width=4.0cm]{orange_neutral}}
 \end{minipage}
-\caption{Prosody Feature Extraction}
-\label{fig:prosodyextraction}
+\hfill
+\begin{minipage}[b]{0.44\linewidth}
+  \centering
+  \centerline{\includegraphics[width=4.0cm]{orange_aNOTHer}}
+\end{minipage}
+%
+\caption{Normalized pitch and power contours. The figure on the right was uttered with a tone of disbelief.}
+\label{fig:pitchpow1}
+%
 \end{figure}
 
 \section{Vowel Clustering}

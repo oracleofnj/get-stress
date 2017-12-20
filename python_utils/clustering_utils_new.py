@@ -167,7 +167,7 @@ def get_combined_vowel_clusters(vowels, n_clusters=8):
     }
 
 
-def cluster_phoneme(key_features, vowel_clusters, phone):
+def cluster_phoneme(key_features, vowel_clusters, phone, include_scaled_features=False):
     if phone['phone'] == 'SIL':
         return phone['phone']
 
@@ -184,7 +184,14 @@ def cluster_phoneme(key_features, vowel_clusters, phone):
         scaled_features = vowel_clusters['scaler'].transform(features)
         km_cluster = vowel_clusters['kmeans'].predict(scaled_features)
         cluster = km_cluster[0]
-        short_phone = '{0} VOWEL{1}'.format(phone['phone'][:-2], cluster)
+        if include_scaled_features:
+            short_phone = '{0} VOWEL{1} ({2})'.format(
+                phone['phone'][:-2],
+                cluster,
+                ', '.join('{:.3f}'.format(f) for f in scaled_features[0])
+            )
+        else:
+            short_phone = '{0} VOWEL{1}'.format(phone['phone'][:-2], cluster)
 
     if word_boundary:
         return short_phone + ' sp'
@@ -192,15 +199,15 @@ def cluster_phoneme(key_features, vowel_clusters, phone):
         return short_phone
 
 
-def transcribe_key(feats, alignments, vowel_clusters, key):
+def transcribe_key(feats, alignments, vowel_clusters, key, include_scaled_features=False):
     return ' '.join([
-        cluster_phoneme(feats[key], vowel_clusters, align)
+        cluster_phoneme(feats[key], vowel_clusters, align, include_scaled_features=include_scaled_features)
         for align in alignments[key]
     ])
 
 
-def transcribe_all(feats, alignments, vowel_clusters):
-    return {key: transcribe_key(feats, alignments, vowel_clusters, key)
+def transcribe_all(feats, alignments, vowel_clusters, include_scaled_features=False):
+    return {key: transcribe_key(feats, alignments, vowel_clusters, key, include_scaled_features=include_scaled_features)
             for key in feats.keys()}
 
 
@@ -229,7 +236,11 @@ def make_vowel_clusters(alignments_file, features_npz_file, vowel_pkl_file, subs
         pickle.dump(vc, f)
 
 
-def make_transcriptions_subsample(alignments_file, features_npz_file, vowel_pkl_file, sample_metadata_file, subsampling=0.05, random_state=6999, strip_four=True):
+def make_transcriptions_subsample(
+    alignments_file, features_npz_file, vowel_pkl_file,
+    sample_metadata_file, subsampling=0.05, random_state=6999,
+    strip_four=True, include_scaled_features=False
+):
     with open(alignments_file) as f:
         alignments_all = json.load(f)
     feats_all = np.load(features_npz_file)
@@ -237,8 +248,13 @@ def make_transcriptions_subsample(alignments_file, features_npz_file, vowel_pkl_
         vc = pickle.load(f)
     feats_samp, align_samp = subsample(feats_all, alignments_all, subsampling, random_state)
     pitch_and_power_samp = get_all_pitch_and_power(feats_samp)
-    sample_transcriptions = transcribe_all(pitch_and_power_samp, align_samp, vc)
-    save_transcriptions(sample_metadata_file, sample_transcriptions, strip_four=strip_four)
+    sample_transcriptions = transcribe_all(
+        pitch_and_power_samp,
+        align_samp, vc,
+        include_scaled_features=include_scaled_features
+    )
+    if not include_scaled_features:
+        save_transcriptions(sample_metadata_file, sample_transcriptions, strip_four=strip_four)
 
 
 def plot_utterances(alignments_file, features_npz_file, output_path):
