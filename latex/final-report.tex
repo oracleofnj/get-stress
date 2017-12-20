@@ -76,11 +76,25 @@ The final portion of the system is generates new utterances. As input, it takes 
 
 All three portions of the pipeline involve extracting prosody features from the input audio -- in the vowel-cluster training process, the input audio is the multi-speaker dataset; in the single-speaker annotation process, the input audio is the single-speaker dataset; and in the utterance-generation portion, the input audio is the new utterance the user wishes to re-synthesize in a new voice.
 The prosody feature extraction is performed in three steps.
+
 First, Kaldi's \texttt{align.sh} script uses a pretrained acoustic triphone model -- in this project, the final triphone model resulting from Kaldi's TEDLIUM recipe -- to compute a forced alignment of the input audio, and Kaldi's \texttt{ali-to-phones} tool is used to convert the model-level alignment to a sequence of \textit{(phone\_id, start\_time, end\_time)} tuples.
-Next, Kaldi's \texttt{make_mfcc_pitch.sh} script creates the MFCC and pitch features for each frame of the input audio and the \texttt{}
+Next, Kaldi's \texttt{make\_mfcc\_pitch.sh} script creates the MFCC and pitch features for each frame of the input audio, the \texttt{copy-matrix} tool converts this to a text file, and my python script \texttt{kaldi\_to\_npz.py} converts the text file to a numpy array (.npz) file.
+Finally, seven real-valued features are created for each vowel phone in the alignment.
+
+The first three features are the coefficients of the second-degree Legendre series that is the least-squares fit to a series of $(x, y)$ points where the length of the series is the computed number of frames plus 4, the $x$ values are evenly spaced between -1 and 1, and the $y$ values are the frame-by-frame pitch values computed using Kaldi's pitch-extraction algorithm, starting two frames before the beginning of the phone and ending two frames after the end of the phone.
+Since Kaldi's algorithm already normalizes the pitch contour over a three-second window, no further normalization is done before computing the Legendre coefficients.
 
 
-I used pitch (from Kaldi) and power. I used first three Legendre coefficients to extract a finite set of features for a phoneme of arbitrary length by using [-1, 1] as the domain regardless of the actual length of the phoneme. I added a few frames at the beginning and end in case Kaldi got the alignment wrong. Show what the Legendre coefficients look like for some different curves. Show what the actual pitch and power curves look like for some brief, manually labeled utterances. Describe the Kaldi pitch extractor. Definitely include the Kaldi paper as a reference. Explain how the Legendre coefficients work. Explain why these were a sensible way of capturing prosody. Talk about pitch envelopes and tonal languages.
+The next three features are the Legendre coefficients for the power (first MFCC component) component, which is normalized to have mean zero and variance one over the whole utterance before computing these coefficients. The coefficients are calculated in the same way as for the pitch features.
+The seventh feature is simply the duration of the phone.
+
+These seven features were chosen in the hopes of maximizing the useful prosodic information available in a small set of numbers per phoneme.
+The two frames (20 ms) before and after the utterance are added to the sequence to improve the conditioning of the least-squares fit matrix; to compensate for potential slight errors in the alignment as computed by Kaldi; and to provide a small degree of context for the vowel in question.
+The domain is fixed at [-1, 1] so that the coefficients capture the level, slope and curvature over the length of the phoneme, regardless of the duration.
+Due to the structure of the Legendre polynomials, the three features for the pitch and power series contain information about whether the vowel is pronounced with a rising, falling, or flat tone, and whether the vowel contained a local maximum or minimum of pitch or power.
+Finally, the duration feature is a simple attempt to detect whether the vowel is pronounced quickly or is drawn-out.
+
+Show what the Legendre coefficients look like for some different curves. Show what the actual pitch and power curves look like for some brief, manually labeled utterances. Describe the Kaldi pitch extractor. Definitely include the Kaldi paper as a reference. Explain how the Legendre coefficients work. Explain why these were a sensible way of capturing prosody. Talk about pitch envelopes and tonal languages.
 
 \section{Clustering Vowels}
 \label{sec:vowels}
