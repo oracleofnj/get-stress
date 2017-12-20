@@ -1,8 +1,10 @@
+from __future__ import print_function
+from __future__ import division
 import os
 import sys
 from cleaners import *
 
-ROOT_PATH="/home/jss2272"
+ROOT_PATH=os.path.expanduser('~')
 TACOTRON_PATH=os.path.join(ROOT_PATH, "tacotron")
 STRESS=os.path.join(ROOT_PATH, "get-stress")
 
@@ -22,6 +24,3 @@ def convert_metadata(filename):
 
 if __name__ == "__main__":
   convert_metadata(os.path.join(TACOTRON_PATH, sys.argv[1]))
-
-
-

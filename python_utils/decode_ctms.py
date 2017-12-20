@@ -1,9 +1,11 @@
+from __future__ import print_function
+from __future__ import division
 import os
 import sys
 import json
 from cleaners import *
 
-ROOT_PATH="/home/jss2272"
+ROOT_PATH=os.path.expanduser('~')
 TACOTRON_PATH=os.path.join(ROOT_PATH, "tacotron")
 STRESS=os.path.join(ROOT_PATH, "get-stress")
 
@@ -30,7 +32,3 @@ if __name__ == "__main__":
   phone_ids = read_phones(os.path.join(STRESS, sys.argv[1]))
   utts = read_ctm(os.path.join(STRESS, sys.argv[2]), phone_ids)
   print(json.dumps(utts, indent=2))
-
-
-
-

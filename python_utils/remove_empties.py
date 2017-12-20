@@ -1,8 +1,10 @@
+from __future__ import print_function
+from __future__ import division
 import os
 import sys
 from cleaners import *
 
-ROOT_PATH="/home/jss2272"
+ROOT_PATH=os.path.expanduser('~')
 TACOTRON_PATH=os.path.join(ROOT_PATH, "tacotron")
 STRESS=os.path.join(ROOT_PATH, "get-stress")
 
@@ -28,6 +30,3 @@ def filter_file(filename, utterances):
 if __name__ == "__main__":
   utterances = get_utterances(os.path.join(TACOTRON_PATH, sys.argv[1]))
   filter_file(os.path.join(STRESS, sys.argv[2]), utterances)
-
-
-
