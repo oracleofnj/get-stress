@@ -211,6 +211,17 @@ However, several pairs of input and output audio are included with the code for 
 These demonstrate, at least to the author's ears, that the extracted features and resulting cluster labels are indeed capturing some semantic meaning in the input that is reflected in the synthesized audio.
 They also reveal some shortcomings of the approach taken here and possibilities for future improvement.
 
+The eight cluster centers are displayed in Figure \ref{fig:clustercenters}.
+
+\begin{figure}[htb]
+
+\begin{minipage}[b]{1.0\linewidth}
+  \centering
+  \centerline{\includegraphics[width=8.5cm]{cluster_centers.png}}
+\end{minipage}
+\caption{The eight computed cluster centers. Note that while the scale of the y-axis is constant across plots, the x-axis is different for different clusters.}
+\label{fig:clustercenters}
+\end{figure}
 
 
 Here I need to demonstrate that the clusters are in fact "semantically" different in some way. Maybe include some metric of these or run TSNE on the coefficients.

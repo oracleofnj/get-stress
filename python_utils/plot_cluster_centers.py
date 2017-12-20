@@ -32,12 +32,12 @@ def plot_cluster_centers(cluster_model, output_file=None, n_points=21):
     po_max = np.max(mean_power_polys)
     fig, axes = plt.subplots(4, 2, figsize=(8, 12))
     fig.subplots_adjust(wspace=0.75)
-    for pi, po, d, ax1 in zip(
+    for i, (pi, po, d, ax1) in enumerate(zip(
         mean_pitch_polys,
         mean_power_polys,
         dur_coefs,
         axes.ravel()
-    ):
+    )):
         ax1.plot((1000*d/2.)*np.linspace(-1, 1, 21), pi, color='blue')
         ax1.set_ylim(
             pi_min - (pi_max - pi_min)/20.,
@@ -53,6 +53,10 @@ def plot_cluster_centers(cluster_model, output_file=None, n_points=21):
             '{0} ms'.format(int(x))
             for x in ax1.get_xticks()
         ])
+        if i % 2 == 0:
+            ax1.set_ylabel('Pitch', color='blue')
+        else:
+            ax2.set_ylabel('Power', color='red')
     fig.savefig(output_file)
 
 
