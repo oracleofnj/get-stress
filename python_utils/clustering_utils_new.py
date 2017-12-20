@@ -87,6 +87,7 @@ def plot_utterance(key, pitch_and_power, alignments):
     ax2.tick_params('x', colors='r')
 
     for phone in align:
+        print(type(phone))
         print(type(phone['start_time']))
         print(phone['start_time'])
         ax1.axhline(y=100*phone['start_time'])
