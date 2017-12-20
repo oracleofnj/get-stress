@@ -91,6 +91,10 @@ steps/align_si.sh --nj $nj --cmd "$train_cmd" \
 $KALDI_ROOT/src/bin/ali-to-phones \
   --ctm-output $ANNOTATION_DIR/ali/final.mdl \
   ark:"gunzip -c $ANNOTATION_DIR/ali/ali.1.gz|" - > $ANNOTATION_DIR/ali/ali.1.ctm
+
+
+
+
 exit
 
 
