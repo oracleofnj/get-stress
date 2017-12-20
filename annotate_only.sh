@@ -61,7 +61,7 @@ echo "$INPUT_FILENAME $INPUT_FILENAME 0 $length" > $ANNOTATION_DIR/segments
 # Make wav.scp
 echo "$INPUT_FILENAME $ANNOTATION_DIR/$MONO_WAV" > $ANNOTATION_DIR/wav.scp
 
-TRANSCRIPTION = "$(cat $2)"
+TRANSCRIPTION="$(cat $2)"
 echo "$INPUT_FILENAME $TRANSCRIPTION" > $ANNOTATION_DIR/text
 
 # Create alignment
