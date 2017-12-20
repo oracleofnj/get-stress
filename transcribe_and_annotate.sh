@@ -87,6 +87,10 @@ mkdir -p $ANNOTATION_DIR/ali
 steps/align_si.sh --nj $nj --cmd "$train_cmd" \
   $ANNOTATION_DIR $TEDLIUM/data/lang $TEDLIUM/exp/tri3 $ANNOTATION_DIR/ali
 
+# Convert to phones
+$KALDI_ROOT/src/bin/ali-to-phones \
+  --ctm-output $ANNOTATION_DIR/ali/final.mdl \
+  ark:"gunzip -c $ANNOTATION_DIR/ali/ali.1.gz|" - > $ANNOTATION_DIR/ali/ali.1.ctm
 exit
 
 
