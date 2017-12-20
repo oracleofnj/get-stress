@@ -1,0 +1,23 @@
+# paste-feats --length-tolerance=2 "ark:extract-segments scp,p:data/never_said/wav.scp never_said_pitch/log/segments.1 ark:- | compute-mfcc-feats  --verbose=2 --config=conf/mfcc.conf ark:- ark:- |" "ark,s,cs:extract-segments scp,p:data/never_said/wav.scp never_said_pitch/log/segments.1 ark:- | compute-kaldi-pitch-feats --verbose=2 --config=conf/pitch.conf ark:- ark:- | process-kaldi-pitch-feats  ark:- ark:- |" ark:- | copy-feats --compress=true ark:- ark,scp:/home/jss2272/get-stress/never_said_pitch/raw_mfcc_pitch_never_said.1.ark,/home/jss2272/get-stress/never_said_pitch/raw_mfcc_pitch_never_said.1.scp 
+# Started at Tue Dec  5 02:58:43 UTC 2017
+#
+copy-feats --compress=true ark:- ark,scp:/home/jss2272/get-stress/never_said_pitch/raw_mfcc_pitch_never_said.1.ark,/home/jss2272/get-stress/never_said_pitch/raw_mfcc_pitch_never_said.1.scp 
+paste-feats --length-tolerance=2 'ark:extract-segments scp,p:data/never_said/wav.scp never_said_pitch/log/segments.1 ark:- | compute-mfcc-feats  --verbose=2 --config=conf/mfcc.conf ark:- ark:- |' 'ark,s,cs:extract-segments scp,p:data/never_said/wav.scp never_said_pitch/log/segments.1 ark:- | compute-kaldi-pitch-feats --verbose=2 --config=conf/pitch.conf ark:- ark:- | process-kaldi-pitch-feats  ark:- ark:- |' ark:- 
+extract-segments scp,p:data/never_said/wav.scp never_said_pitch/log/segments.1 ark:- 
+compute-mfcc-feats --verbose=2 --config=conf/mfcc.conf ark:- ark:- 
+VLOG[2] (compute-mfcc-feats[5.2.153~1-971f]:main():compute-mfcc-feats.cc:173) Processed features for key JS001-MONey-001
+extract-segments scp,p:data/never_said/wav.scp never_said_pitch/log/segments.1 ark:- 
+process-kaldi-pitch-feats ark:- ark:- 
+compute-kaldi-pitch-feats --verbose=2 --config=conf/pitch.conf ark:- ark:- 
+VLOG[2] (compute-mfcc-feats[5.2.153~1-971f]:main():compute-mfcc-feats.cc:173) Processed features for key JS001-MY-001
+VLOG[2] (compute-mfcc-feats[5.2.153~1-971f]:main():compute-mfcc-feats.cc:173) Processed features for key JS001-NEVER-001
+LOG (extract-segments[5.2.153~1-971f]:main():extract-segments.cc:194) Successfully processed 4 lines out of 4 in the segments file. 
+VLOG[2] (compute-mfcc-feats[5.2.153~1-971f]:main():compute-mfcc-feats.cc:173) Processed features for key JS001-STOLE-001
+LOG (compute-mfcc-feats[5.2.153~1-971f]:main():compute-mfcc-feats.cc:176)  Done 4 out of 4 utterances.
+LOG (extract-segments[5.2.153~1-971f]:main():extract-segments.cc:194) Successfully processed 4 lines out of 4 in the segments file. 
+LOG (compute-kaldi-pitch-feats[5.2.153~1-971f]:main():compute-kaldi-pitch-feats.cc:110) Done 4 utterances, 0 with errors.
+LOG (process-kaldi-pitch-feats[5.2.153~1-971f]:main():process-kaldi-pitch-feats.cc:85) Post-processed pitch for 4 utterances.
+LOG (paste-feats[5.2.153~1-971f]:main():paste-feats.cc:158) Done 4 utts, errors on 0
+LOG (copy-feats[5.2.153~1-971f]:main():copy-feats.cc:143) Copied 4 feature matrices.
+# Accounting: time=0 threads=1
+# Ended (code 0) at Tue Dec  5 02:58:43 UTC 2017, elapsed time 0 seconds
