@@ -67,7 +67,7 @@ steps/compute_cmvn_stats.sh $ANNOTATION_DIR
 
 # Decode
 steps/decode_fmllr.sh --nj $decode_nj --cmd "$decode_cmd"  --num-threads 4 \
-  $TEDLIUM/exp/tri3/graph $ANNOTATION_DIR/data $ANNOTATION_DIR/decode
+  $TEDLIUM/exp/tri3/graph $ANNOTATION_DIR $ANNOTATION_DIR/decode
 
 
 exit
