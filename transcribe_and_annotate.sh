@@ -58,6 +58,9 @@ utils/utt2spk_to_spk2utt.pl $ANNOTATION_DIR/utt2spk > $ANNOTATION_DIR/spk2utt
 length="$(sox $1 -n stat 2>&1 | sed -n 's#^Length (seconds):[^0-9]*\([0-9.]*\)$#\1#p')"
 echo "$INPUT_FILENAME $INPUT_FILENAME 0 $length" > $ANNOTATION_DIR/segments
 
+# Make wav.scp
+echo "$INPUT_FILENAME $ANNOTATION_DIR/$MONO_WAV" > $ANNOTATION_DIR/wav.scp
+
 exit
 
 if [ $stage -le 14 ]; then
