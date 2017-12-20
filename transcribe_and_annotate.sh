@@ -102,8 +102,9 @@ mkdir -p $ANNOTATION_DIR/pitch
 steps/make_mfcc_pitch.sh --nj $nj --cmd "$train_cmd" \
   $ANNOTATION_DIR $ANNOTATION_DIR/log $ANNOTATION_DIR/pitch
 
-
-
+# Convert to numpy
+copy-matrix scp:$ANNOTATION_DIR/feats.scp ark,t:- > $ANNOTATION_DIR/pitch/textoutput.txt
+python python_utils/kaldi_to_npz.py $ANNOTATION_DIR/pitch/textoutput.txt $ANNOTATION_DIR/pitch/numpy_features
 
 exit
 
