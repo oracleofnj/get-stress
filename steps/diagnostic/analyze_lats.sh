@@ -31,7 +31,7 @@ fi
 lang=$1
 dir=$2
 
-model=$dir/../${iter}.mdl
+model=$lang/../${iter}.mdl
 
 for f in $lang/words.txt $model $dir/lat.1.gz $dir/num_jobs; do
   [ ! -f $f ] && echo "$0: expecting file $f to exist" && exit 1;
