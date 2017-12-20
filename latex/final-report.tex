@@ -49,15 +49,17 @@ Wong and Siu \cite{pui2004decision} use robust regression and orthogonal polynom
 
 Speech synthesis or text-to-speech is a well-studied problem that has been actively researched since the 1950s. While there has been remarkable progress in the field in recent years, the quality of computer-generated speech has not yet reached human levels. Current commercial systems described in Khan et al. \cite{khan2016concatenative} and Taylor  \cite{taylor2009text} generally use concatenative speech synthesis to produce their output. However, the alternative approach of parametric synthesis using neural networks is rapidly gaining popularity, with several papers since 2016 demonstrating impressive results in the quality of the output.
 The first of this generation was Google's WaveNet (Oord et al. \cite{oord2016wavenet}), followed in quick succession by Deep Voice and Deep Voice 2 from Baidu (Arik et al. \cite{arik2017deep}, \cite{arik2017deep2}), Char2Wav from MILA (Sotelo et al. \cite{sotelo2017char2wav}), and Tacotron from Google (Wang et al. \cite{wang2017tacotron}).
-Each of these systems has taken a different approach to the network architecture to address different aspects of the speech synthesis pipeline. Tacotron, which is the backend used in this project, is a nearly end-to-end text-to-speech system based on the sequence-to-sequence with attention model. As the authors describe, ``The model takes characters as input and outputs the corresponding raw spectrogram, which is then fed to the Griffin-Lim reconstruction algorithm to synthesize speech.''
+Each of these systems has taken a different approach to the network architecture to address different aspects of the speech synthesis pipeline. Tacotron, which is the backend used in this project, is an end-to-end text-to-speech system based on the sequence-to-sequence with attention model. As the authors describe, ``The model takes characters as input and outputs the corresponding raw spectrogram, which is then fed to the Griffin-Lim reconstruction algorithm to synthesize speech.''
 
 \section{Overview}
 \label{sec:overview}
-The goal of this project was to create a system that, given an input audio file from an arbitrary speaker, produces a synthesized audio output of the same utterance in the voice of a second speaker, where the prosody of the output audio matches that of the input audio as closely as possible. The system implemented uses a pipeline of several processing steps in order to accomplish this. An overview of the pipeline and a diagram are presented here for context; a detailed description of each step follows.
+The goal of this project was to create a system that, given an input audio file from an arbitrary speaker, produces a synthesized audio output of the same utterance in the voice of a second speaker, where the prosody of the output audio matches that of the input audio as closely as possible.
+The system implemented uses a pipeline of several processing steps in order to accomplish this.
+An overview of the pipeline and a diagram are presented here for context; a detailed description of each step follows.
 
 The first portion of the system is the vowel-cluster training process, which takes as input a previously-trained acoustic model for alignment and a speech dataset from multiple speakers. As output, it produces a clustering model that can be used to annotate an audio utterance from an arbitrary speaker with cluster labels for each vowel in the utterance. This portion of the system uses Kaldi to, first, perform forced alignment on the multi-speaker dataset, and, second, to extract the pitch contour and the first (energy) MFCC component for each frame of the input audio. Given the alignment, pitch, and power contours, an unsupervised clustering algorithm (K-means) trained on the audio segments corresponding to vowels to learn several distinct ways in which syllables can be pronounced.
 
-The second portion of the system is the single-speaker annotation process, which takes as input the pre-existing acoustic model, the newly-trained vowel-cluster model, and a large speech dataset from a single speaker. As output, it produces a trained Tacotron model that can be used to generate synthesized utterances. This portion of the system first uses Kaldi to perform forced alignment on the speech dataset and extract the pitch and power features, as before. It then uses the vowel-cluster model to produce an annotated phoneme sequence for each utterance in the single-speaker dataset. Finally, the audio and the annotated phoneme sequence pairs are used to train the Tacotron model.
+The second portion of the system is the speech-synthesis training process, which takes as input the pre-existing acoustic model, the newly-trained vowel-cluster model, and a large speech dataset from a single speaker. As output, it produces a trained Tacotron model that can be used to generate synthesized utterances. This portion of the system first uses Kaldi to perform forced alignment on the speech dataset and extract the pitch and power features, as before. It then uses the vowel-cluster model to produce an annotated phoneme sequence for each utterance in the single-speaker dataset. Finally, the audio and the annotated phoneme sequence pairs are used to train the Tacotron model.
 
 The final portion of the system is generates new utterances. As input, it takes the pre-existing acoustic model, the newly-trained vowel-cluster model, and the newly-trained Tacotron model, and an input audio file in the voice of an arbitrary speaker. As output, it produces synthesized audio of the equivalent utterance where the prosody matches that of the input utterance as closely as possible. This portion of the system computes an alignment for the input utterance and extracts the pitch and power features; uses the vowel cluster model to produce an annotated phoneme sequence for the input utterance; and, finally, uses the newly-trained Tacotron model to synthesize the output audio.
 
@@ -84,8 +86,7 @@ Finally, seven real-valued features are created for each vowel phone in the alig
 The first three features are the coefficients of the second-degree Legendre series that is the least-squares fit to a series of $(x, y)$ points where the length of the series is the computed number of frames plus 4, the $x$ values are evenly spaced between -1 and 1, and the $y$ values are the frame-by-frame pitch values computed using Kaldi's pitch-extraction algorithm, starting two frames before the beginning of the phone and ending two frames after the end of the phone.
 Since Kaldi's algorithm already normalizes the pitch contour over a three-second window, no further normalization is done before computing the Legendre coefficients.
 
-
-The next three features are the Legendre coefficients for the power (first MFCC component) component, which is normalized to have mean zero and variance one over the whole utterance before computing these coefficients. The coefficients are calculated in the same way as for the pitch features.
+The next three features are the Legendre coefficients for the power (first MFCC component) component, calculated in the same way as for the pitch features. Since this component is not normalized by Kaldi, my system normalized the coefficient to have mean zero and unit variance over the whole utterance before computing these coefficients.
 The seventh feature is simply the duration of the phone.
 
 These seven features were chosen in the hopes of maximizing the useful prosodic information available in a small set of numbers per phoneme.
@@ -94,11 +95,11 @@ The domain is fixed at [-1, 1] so that the coefficients capture the level, slope
 Due to the structure of the Legendre polynomials, the three features for the pitch and power series contain information about whether the vowel is pronounced with a rising, falling, or flat tone, and whether the vowel contained a local maximum or minimum of pitch or power.
 Finally, the duration feature is a simple attempt to detect whether the vowel is pronounced quickly or is drawn-out.
 
-Most importantly, these features are indended to be useful for identifying which syllables in an utterance are stressed. As Selkirk \cite{selkirk1995sentence} discusses, ``In English a pitch accent associates to a stress-promiment syllable in a word (typically the main word stress).''
+Most importantly, these features are intended to be useful for identifying which syllables in an utterance are stressed. As Selkirk \cite{selkirk1995sentence} discusses, ``In English a pitch accent associates to a stress-promiment syllable in a word (typically the main word stress).''
 However, spoken English uses pitch contour to convey more information than simply which syllable is a word is stressed. Pierrehumbert \cite{pierrehumbert1980phonology} identifies 22 different patterns that an English phrase can exhibit, consisting of various combinations of pitch accent, phrase accent, and intonation occurring at the end of a phrase.
 These phrases carry semantic content beyond the actual words of the text. For example, different stress patterns can indicate surprise, emphasis, disbelief, or neutrality, among others.
 
-Figure \ref{fig:pitchpow1} displays the pitch and power contours that Kaldi computes for two pronunciations of the the two-word phrase ``another orange'' (the phrase is from Pierrehumbert \cite{pierrehumbert1980phonology}.) In the first audio file, the words are spoken with a neutral tone. In the second pronunciation, the words are spoken with a tone of disbelief, i.e., ``a\textbf{NOTH}er orange?''. The seven computed features for each vowel are displayed in Table \ref{table:pitchpow1}.
+Figure \ref{fig:pitchpow1} displays the pitch and power contours that Kaldi computes for two pronunciations of the the two-word phrase ``another orange'' (the phrase is from Pierrehumbert \cite{pierrehumbert1980phonology}.) In the first audio file, the words are spoken with a neutral tone. In the second pronunciation, the words are spoken with a tone of disbelief, i.e., ``a\textbf{NOTH}er orange???''. The seven computed features for each vowel are displayed in Table \ref{table:pitchpow1}.
 
 \begin{figure}[htb]
 
@@ -110,31 +111,50 @@ Figure \ref{fig:pitchpow1} displays the pitch and power contours that Kaldi comp
 \label{fig:prosodyextraction}
 \end{figure}
 
-\section{Clustering Vowels}
+\section{Vowel Clustering}
 \label{sec:vowels}
 
+To the extent that the seven extracted prosody features for each vowel do indeed convey useful information, there are numerous ways one could imagine using them to ``clone'' an input utterance.
+For example, the speech output of a speech synthesis system could be distorted in some smooth way in order to try and match the pitch and power contours of the entire input audio.
+Alternately, they could be used as the inputs to a supervised classification algorithm that learned to classify each syllable as stressed or unstressed, with the help of a manually-annotated dataset.
+The system I implemented uses $k$-means, an unsupervised algorithm, to partition the space of features into 8 categorical cluster labels.
+
+As stated in Sec. \ref{sec:overview}, the input to the vowel-cluster training process consists of an acoustic model and a multi-speaker speech dataset.
+The prosody features for each vowel in the dataset are first computed using the acoustic model as described in Sec. \ref{sec:prosody}.
+These features are then normalized over the entire dataset to have zero mean and unit variance on a feature-by-feature basis.
+Finally, $k$-means clustering with $k$=8 returns eight vectors in $\mathbf{R}^7$ corresponding to the cluster centroids.
+The resulting vowel cluster model therefore consists of the scaling factors that normalize each feature of the input dataset and the eight cluster centroids. This portion of the system was implemented using \texttt{scikit-learn} \cite{scikit-learn}.
+
+There were number of choices involved in how to perform the clustering, including the number of clusters, the use of an unsupervised algorithm as opposed to a supervised algorith, and the decision to use a single set of cluster labels for all vowels, as opposed to computing clusters for each vowel individually. These choices are discussed further in Sec. \ref{sec:discussion}.
 
 
-Unsupervised learning FTW. Discuss why we should expect there to be clusters even in an atonal language like English. Talk about stressed vs unstressed as initial motivation but how there are probably more things like this. Talk about how stress is mostly a pitch change.
+Here I need to demonstrate that the clusters are in fact "semantically" different in some way. Maybe include some metric of these or run TSNE on the coefficients.
 
-I ran K-means clustering on my seven features and created eight vowel clusters. I'm pretty sure I ran StandardScaler on the features first so K-means didn't get confused, double check this. This was intended to be enough to capture the major variation across how different vowels can be pronounced but not so many as to result in too-few training examples. I originally did this for each vowel separately, and only for a single speaker, but then I decided that was stupid so I did it across all speakers and across eight vowels. So there are only eight clusters. Here I need to demonstrate that the clusters are in fact "semantically" different in some way. Maybe include some metric of these or run TSNE on the coefficients.
-
-I could probably have also just used the actual Legendre coefficients themselves but this would have required tinkering with the Tacotron internals more to accept continuous-valued features as part of the sequence instead of just a one-hot encoded value. This is something that could go in a future work section.
-
-\section{Tacotron}
+\section{Speech Synthesis}
 \label{sec:tacotron}
 
-Describe the Tacotron architecture and explain why it was easy to add the cluster labels.
+The speech-synthesis training portion of the system produces a model that can be used to generate new utterances. The input to this portion of the system is the pretrained acoustic model, the vowel-clustering model resulting from Sec. \ref{sec:vowels}, and a large single-speaker dataset consisting of [text, audio] pairs.
+In this phase, the prosody features are first extracted as described in Sec. \ref{sec:prosody}. Next, the vowel-clustering model is used to assign cluster labels to each vowel in the dataset.
+The result is a set of [labeled-phone-sequence, audio] pairs; for a single utterance in the dataset, the labeled phone sequence for that utterance is the sequence of phones along with the cluster labels for each vowel. For example, the text for one short utterance in the dataset used here is ``In 1813''.
+The corresponding labeled phone sequence is ``IH VOWEL4 N sp SIL EY VOWEL1 T IY VOWEL4 N sp TH ER VOWEL6 T IY VOWEL2 N sp SIL''. The ``sp'' tokens correspond to word boundaries.
 
-\subsection{Subheadings}
-\label{ssec:subhead}
+The Tacotron \cite{wang2017tacotron} neural network system was trained on the [labeled phone sequence, audio] pairs to produce audio.
+Tacotron's internal neural network architecture is far too complex to describe in detail in this paper. As a brief overview, it is based on the Sutskever et al \cite{sutskever2014sequence} encoder-decoder seq2seq model with Bahdanau \cite{bahdanau2014neural} attention. The input is a sequence of one-hot-encoded characters.
+The encoder embeds the characters in a continuous vector space, and passes them through the CBHG module described in the Tacotron paper.
+The decoder uses GRUs with attention to produce linear-scale spectrogram as the output sequence.
 
-Just for reminder.
+Since Tacotron is agnostic to the character set, I used the phones and the cluster labels, along with the word-boundary marker, as the character set. Tacotron's neural network architecture makes this possible out-of-the-box; it was specifically designed to accomodate end-to-end training using only audio and the corresponding text as its inputs, in contrast to the relatively complex requirements for most speech synthesis systems.
+One specific advantage discussed by the authors is that ``it more easily
+allows for rich conditioning on various attributes''. The vowel cluster labels used here are an example of this conditioning.
 
-\subsubsection{Sub-subheadings}
-\label{sssec:subsubhead}
+For this project, I used Keith Ito's open-source implementation of Tacotron, with only small modifications required to accomodate my modified character set. The model was trained with his public-domain LJ Speech Dataset \cite{ljspeech17}, which he describes on his website as follows:
+``This is a public domain speech dataset consisting of 13,100 short audio clips of a single speaker reading passages from 7 non-fiction books. A transcription is provided for each clip. Clips vary in length from 1 to 10 seconds and have a total length of approximately 24 hours. The texts were published between 1884 and 1964, and are in the public domain. The audio was recorded in 2016-17 by the LibriVox project and is also in the public domain.''
 
-Just for reminder.
+The result of this portion of the system is a trained model that takes a labeled phone sequence as input and produces audio as output.
+
+\section{New Utterance Generation}
+\label{sec:newuttgen}
+
 
 
 \section{Results}
@@ -149,10 +169,27 @@ Try and quantify that the speech result is better for my Tacotron than for witho
 Try and quantify that the output is actually preserving stuff from the original speech dataset.
 
 \section{Discussion}
+\label{sec:discussion}
+
+\subsection{Vowel Clustering}
+\label{ssec:discussvowels}
+
+The number of clusters was chosen somewhat arbitrarily; it was intended to be high enough to distinguish the ways that English speakers pronounce any single vowel in isolation, but low enough that the resulting clusters would generalize well across multiple speakers.
+The use of K-means as opposed to any other unsupervised clustering algorithm was also an arbitrary decision, motivated only by the algorithm's speed and overall good performance on a wide range of clustering tasks.
+
+By contrast, the choice of an unsupervised algorithm instead of a supervised algorithm was intentional.
+Although my original intent in this project was to train a classifier that could learn to distinguish between stressed and unstressed syllables, I believe that this would have been unnecessarily limiting.
+Indeed, although Pierrehumbert \cite{pierrehumbert1980phonology} distinguishes only between H, L, L+H, and H+L for patterns of the F0 contour, the statistics for these patterns may co-occur with the power contour and duration features in meaningful and unknown ways. Rather than limit myself a predefined set of classes, I chose to let the data speak for itself when identifying clusters.
+
+Another choice I made was to compute a single set of clusters for all vowels, as opposed to computing clusters for each vowel individually.
+Arguments can be made for either choice; to the extent that different vowels have distinct phonetic roles, using a single set of prosody cluster labels for all vowels may inadvertently cause the clusters to distinguish between these vowels instead of between the intended prosodic features. For example, dipthongs may exhibit distinct patterns from monopthongs or the schwa.
+In my first version of this project, I computed four distinct clusters for each vowel individually. For the final version, I decided to use a common set of clusters based on my belief (as a native English speaker) that the various pitch and stress patterns are more similar than different from vowel to vowel, and that the system would perform better using more common clusters than fewer specific clusters per vowel.
 
 \section{Limitations}
 
 \section{Future Work}
+
+I could probably have also just used the actual Legendre coefficients themselves but this would have required tinkering with the Tacotron internals more to accept continuous-valued features as part of the sequence instead of just a one-hot encoded value. This is something that could go in a future work section.
 
 \section{Acknowledgements}
 \label{sec:acknowledgements}
