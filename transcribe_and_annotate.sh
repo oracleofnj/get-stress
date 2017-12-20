@@ -76,6 +76,8 @@ lattice-best-path \
   ark:$ANNOTATION_DIR/decode.si/lat.1 \
   ark,t:$ANNOTATION_DIR/one-best.tra
 
+grep $INPUT_FILENAME $ANNOTATION_DIR/one-best.tra > $ANNOTATION_DIR/text
+
 exit
 
 if [ $stage -le 14 ]; then
