@@ -19,9 +19,15 @@ sudo pip install -r requirements.txt
 
 ### USAGE
 
-./annotate_only.sh <path-to-wav> <text>
+```
+./annotate_only.sh <path-to-wav> <path-to-text>
+```
 
+or
+
+```
 ./transcribe_and_annotate.sh <path-to-wav>
+```
 
 ### This portion of the project is written using Python 2, for compatibility with Kaldi.
 
