@@ -11,11 +11,15 @@ The [Final Paper](latex/final-report.pdf) is included here.
 
 ### REQUIREMENTS
 
+The libraries listed below need to be installed to run the feature extractors.
+
 ```
 sudo apt-get install python-tk
 sudo apt-get install ffmpeg
 sudo pip install -r requirements.txt
 ```
+
+Additionally, this folder needs to be installed next to a kaldi-trunk folder that has run the TEDLIUM example script from start to finish and includes the trained triphone models.
 
 ### USAGE
 
