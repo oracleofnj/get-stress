@@ -202,7 +202,7 @@ The ``C'' in CBHG refers to a bank of 1-dimensional convolutional filters; this 
 This project uses Keith Ito's open-source Python 3 / TensorFlow implementation of Tacotron, with only small modifications required to accomodate the modified character set. The model was trained with his LJ Speech Dataset \cite{ljspeech17}, which he describes on his website as follows:
 ``This is a public domain speech dataset consisting of 13,100 short audio clips of a single speaker reading passages from 7 non-fiction books. A transcription is provided for each clip. Clips vary in length from 1 to 10 seconds and have a total length of approximately 24 hours. The texts were published between 1884 and 1964, and are in the public domain. The audio was recorded in 2016-17 by the LibriVox project and is also in the public domain.''
 
-The result of this portion of the system is a trained model that takes a labeled phone sequence as input and produces audio as output. For this project, the model was trained for approximately 150,000 steps, which took approximately four days on a Tesla K80 GPU running on Google Cloud.
+The result of this portion of the system is a trained model that takes a labeled phone sequence as input and produces audio as output. For this project, the model was trained 200,000 steps, which took approximately five days on a Tesla K80 GPU running on Google Cloud.
 
 \section{New Utterance Generation}
 \label{sec:newuttgen}
