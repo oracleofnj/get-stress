@@ -13,7 +13,8 @@
 
 \title{Neural Speech-To-Speech Synthesis}
 \name{Jared Samet - UNI: jss2272}
-\address{jss2272@columbia.edu}
+\address{Columbia University SEAS\\
+Data Science Institute - MS Program}
 \begin{document}
 %\ninept
 %
@@ -22,20 +23,30 @@
 \begin{abstract}
 We present a system that extracts prosody features from a multi-speaker dataset.
 The prosody features are computed using by fitting low-degree Legendre series to the pitch and power contours of the audio for each vowel in the input audio.
-We cluster the features using unsupervised learning to produce a discrete set of categories for the pronunciation of English vowels.
-By adding the cluster labels as annotation to text, a text-to-speech synthesis system can learn to incorporate the prosody into its output.
-We then annotate a single-speaker speech dataset with these cluster labels and then use to train a Tacotron model.
+Unsupervised clustering of the prosody features produces a discrete set of categories for the pronunciation of English vowels. A single-speaker speech dataset is annotated with cluster labels and used to train Tacotron, a neural-network based speech synthesis system.
+By adding the cluster labels as annotation to text, the model can learn to incorporate prosody into its output.
 The resulting system can produce audio that is different even when the text is the same.
-Prosody features from utterances by new speakers can be extracted in the same way and the resulting features used to cluster and annotate the text of the new utterance.
-The trained speech synthesis can use the results to produce new synthesized audio that mimics the prosody from the original speaker.
+By annotating the utterance of a new speaker, the trained speech synthesis model can produce new synthesized audio that, to a limited degree, mimics the prosody of the input.
 \end{abstract}
 %
 \begin{keywords}
-Prosody, unsupervised learning, speech synthesis, seq2seq
+Prosody, pitch accent, vowels, clustering, speech synthesis
 \end{keywords}
 %
 \section{Introduction}
 \label{sec:intro}
+
+A single English sentence can be pronounced in many different ways.
+These different pronunciations, known as prosody or suprasegmental features, can convey information above and beyond the actual words that are spoken.
+Understanding prosody offers the potential for improved performance both in speech recognition and speech synthesis.
+On the speech recognition side, a superior understanding of prosody may help a system respond more appropriately to spoken input.
+On the output side, a speech synthesis system that could incorporate prosody features would have a wider expressive range and might be able to produce more natural sounding speech, or speech that had a more appropriate pronunciation for a given situation.
+
+Pure text-to-speech systems, by definition, must produce a single pronunciation for a single sentence since the only input is the text.
+In this project we demonstrate that certain aspects of prosody can be represented compactly, generalize well across multiple speakers, and can be incorporated into a speech synthesis system to produce new synthesized audio that, to a certain degree, mimics the prosody of the input.
+
+
+
 
 I used Kaldi \cite{Povey_ASRU2011} to create an alignment for the Tedlium data using the final triphone model it created. For each vowel phoneme, I used Kaldi's pitch extractor and the first MFCC component (energy) to create two series of numbers. Kaldi's pitch extractor is already normalized but I used [StandardScaler] to normalize the energy component across the utterance. I fit a second-degree (?) Legendre polynomial to the pitch and power to create six features for each vowel. The duration gave me the seventh feature. I then ran K-means clustering on these to create eight different vowel clusters that were common across the entire range of speakers in the (subsampled) Tedlium data.
 
@@ -96,9 +107,8 @@ The prosody feature extraction is performed in three steps; Figure \ref{fig:pros
 \label{fig:prosodyextraction}
 \end{figure}
 
-First, Kaldi's \texttt{align.sh} script uses a pretrained acoustic triphone model -- in this project, the final triphone model resulting from Kaldi's TEDLIUM recipe -- to compute a forced alignment of the input audio, and Kaldi's \texttt{ali-to-phones} tool is used to convert the model-level alignment to a sequence of \textit{(phone\_id, start\_time, end\_time)} tuples.
-Next, Kaldi's \texttt{make\_mfcc\_pitch.sh} script creates the MFCC and pitch features for each frame of the input audio, the \texttt{copy-matrix} tool converts this to a text file, and my python script \texttt{kaldi\_to\_npz.py} converts the text file to a numpy array (.npz) file.
-Finally, seven real-valued features are created for each vowel phone in the alignment.
+First, Kaldi computes a forced alignment of the input audio using a pretrained acoustic triphone model -- in this project, the final triphone model from Kaldi's TEDLIUM recipe -- resulting in a sequence of \textit{(phone\_id, start\_time, end\_time)} tuples.
+Next, Kaldi computes the MFCC and pitch features for each frame of the input audio. Finally, the system developed here computes seven real-valued features for each vowel phone in the alignment.
 
 The first three features are the coefficients of the second-degree Legendre series that is the least-squares fit to a series of $(x, y)$ points where the length of the series is the computed number of frames plus 4, the $x$ values are evenly spaced between -1 and 1, and the $y$ values are the frame-by-frame pitch values computed using Kaldi's pitch-extraction algorithm, starting two frames before the beginning of the phone and ending two frames after the end of the phone.
 Since Kaldi's algorithm already normalizes the pitch contour over a three-second window, no further normalization is done before computing the Legendre coefficients.
@@ -206,10 +216,14 @@ The trained Tacotron model then uses this sequence directly to synthesize a new 
 \section{Results}
 \label{sec:results}
 
-Although my resources for this project did not permit me to conduct a controlled experiment, a potential one is discussed in Sec \ref{sec:futurework}.
-However, several pairs of input and output audio are included with the code for this project.
+Several pairs of input and output audio are included with the code for this project.
 These demonstrate, at least to the author's ears, that the extracted features and resulting cluster labels are indeed capturing some semantic meaning in the input that is reflected in the synthesized audio.
 They also reveal some shortcomings of the approach taken here and possibilities for future improvement.
+The synthesized audio all falls within a fairly narrow of output, no matter how dramatically I varied my tone as input.
+
+Although my resources for this project did not permit me to conduct a controlled experiment, a potential one is discussed in Sec \ref{sec:futurework}.
+
+
 
 The eight cluster centers are displayed in Figure \ref{fig:clustercenters}.
 
@@ -223,16 +237,6 @@ The eight cluster centers are displayed in Figure \ref{fig:clustercenters}.
 \label{fig:clustercenters}
 \end{figure}
 
-
-Here I need to demonstrate that the clusters are in fact "semantically" different in some way. Maybe include some metric of these or run TSNE on the coefficients.
-
-Find some way to quantify that it actually did something beyond "she never stole my money".
-
-Try and quantify that the different clusters are actually different in some way. This is probably the most important section. Quantify if they are different from male to female speakers in any way.
-
-Try and quantify that the speech result is better for my Tacotron than for without annotations. Say why this could be useful even if no one wants to do speech to speech.
-
-Try and quantify that the output is actually preserving stuff from the original speech dataset.
 
 \section{Discussion}
 \label{sec:discussion}
