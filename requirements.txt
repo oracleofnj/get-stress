@@ -9,7 +9,7 @@ cycler==0.10.0
 google-compute-engine==2.4.1
 inflect==0.2.5
 matplotlib==2.1.1
-numpy==1.13.0
+numpy==1.21.0
 pygobject==3.20.0
 pyparsing==2.2.0
 python-dateutil==2.6.1
