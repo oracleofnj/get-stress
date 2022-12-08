@@ -2,7 +2,7 @@ anyjson==0.3.3
 backports.functools-lru-cache==1.4
 backports.ssl-match-hostname==3.5.0.1
 boto==2.38.0
-certifi==2017.7.27.1
+certifi==2022.12.7
 chardet==2.3.0
 crcmod==1.7
 cycler==0.10.0
